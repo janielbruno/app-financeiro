@@ -849,8 +849,8 @@ function renderMetas() {
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%; background:${color};"></div></div>
       <div style="font-family:var(--font-data);font-size:9px;color:var(--text-main);font-weight:700;margin-top:8px;text-align:right;">${pct.toFixed(1)}% atingido</div>
       <div style="margin-top:14px;display:flex;gap:12px;">
-        <input type="number" step="0.01" placeholder="Já guardei" value="${m.guard||''}" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-main);font-size:13px;font-weight:700;" onchange="updateMetaGuard(${m.id},this.value)"/>
-        <input type="number" step="0.01" placeholder="Meta" value="${m.alvo||''}" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-main);font-size:13px;font-weight:700;" onchange="updateMetaAlvo(${m.id},this.value)"/>
+        <input type="number" step="0.01" placeholder="Já guardei" value="${m.guard||''}" style="flex:1; min-width:0; width:100%; background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-main);font-size:13px;font-weight:700;" onchange="updateMetaGuard(${m.id},this.value)"/>
+        <input type="number" step="0.01" placeholder="Meta" value="${m.alvo||''}" style="flex:1; min-width:0; width:100%; background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text-main);font-size:13px;font-weight:700;" onchange="updateMetaAlvo(${m.id},this.value)"/>
       </div>
     </div>`;
   }).join('');
