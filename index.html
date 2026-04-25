@@ -87,9 +87,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .apart-item-due { font-size: 11px; color: var(--text3); }
 .apart-item-right { text-align:right; }
 .apart-item-val { font-family:'Space Mono',monospace; font-size:13px; font-weight:700; color:var(--orange); }
+.apart-item-val.paused { text-decoration: line-through; color: var(--text3); }
 .apart-item-status { font-size:10px; padding:2px 8px; border-radius:20px; margin-top:3px; display:inline-block; }
 .status-pago { background:var(--green-bg); color:var(--green); }
 .status-pend { background:var(--red-bg); color:var(--red); }
+.status-pausado { background:var(--bg3); color:var(--text2); }
 
 /* LIST ITEMS */
 .tx-item { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); }
@@ -121,7 +123,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .type-btn.active.receita { background:var(--green-bg); color:var(--green); }
 .type-btn.active.despesa { background:var(--red-bg); color:var(--red); }
 
-/* CATEGORY MANAGER (NEW) */
+/* CATEGORY MANAGER */
 .cat-tag { display: inline-flex; align-items: center; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 12px; margin: 0 6px 6px 0; }
 .cat-tag button { background: none; border: none; color: var(--red); margin-left: 8px; cursor: pointer; font-size: 14px; font-weight: bold; }
 .cat-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -168,16 +170,16 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
 
       <div class="apart-section">
-        <div class="apart-header"><div class="icon">🏗️</div><div class="info"><h3>Evolução do Imóvel</h3><p>Custos da obra e entrada (Mês)</p></div><div class="apart-total" id="apart-total">R$ 0</div></div>
+        <div class="apart-header"><div class="icon">🏗️</div><div class="info"><h3>Evolução do Imóvel</h3><p>Custos ativos (Mês)</p></div><div class="apart-total" id="apart-total">R$ 0</div></div>
         <div id="apart-list"></div>
       </div>
 
-      <p class="sec-title">Últimas Transações</p>
+      <p class="sec-title">Últimas Movimentações (Caixa)</p>
       <div class="card"><div class="card-body" style="padding-top:8px;" id="recent-list"></div></div>
     </div>
 
     <div class="page" id="page-transacoes">
-      <p class="sec-title">Todas as Transações</p>
+      <p class="sec-title">Todo o Fluxo de Caixa</p>
       <div class="card"><div class="card-body" style="padding-top:8px;" id="all-tx-list"></div></div>
     </div>
 
@@ -185,11 +187,6 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       <p class="sec-title">Gerenciar Custos do Imóvel</p>
       <div id="apart-manage-list"></div>
       <button class="btn-primary" onclick="openApartModal()" style="margin-top:4px;">+ Adicionar Custo da Obra</button>
-    </div>
-
-    <div class="page" id="page-metas">
-      <p class="sec-title">Minhas Metas</p>
-      <div id="metas-list"></div>
     </div>
 
     <div class="page" id="page-config">
@@ -205,12 +202,21 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
           </div>
         </div>
         <hr style="border:0; border-top:1px solid var(--border); margin-bottom: 20px;"/>
-        <div>
-          <h4 style="font-size: 13px; color: var(--red); margin-bottom: 10px;">🔴 Categorias de Despesa</h4>
+        <div style="margin-bottom: 20px;">
+          <h4 style="font-size: 13px; color: var(--red); margin-bottom: 10px;">🔴 Categorias do Caixa</h4>
           <div id="cat-despesas-list"></div>
           <div class="cat-input-row" style="margin-top: 10px;">
             <input id="new-cat-despesa" type="text" placeholder="Ex: Farmácia..." style="flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--text); font-size:13px;"/>
             <button onclick="addCategoria('despesas')" style="background:var(--red-bg); color:var(--red); border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer;">+</button>
+          </div>
+        </div>
+        <hr style="border:0; border-top:1px solid var(--border); margin-bottom: 20px;"/>
+        <div>
+          <h4 style="font-size: 13px; color: var(--orange); margin-bottom: 10px;">🏗️ Custos do Apê</h4>
+          <div id="cat-ape-list"></div>
+          <div class="cat-input-row" style="margin-top: 10px;">
+            <input id="new-cat-ape" type="text" placeholder="Ex: IPTU, Vistoria..." style="flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:var(--text); font-size:13px;"/>
+            <button onclick="addCategoria('ape')" style="background:var(--orange-bg); color:var(--orange); border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer;">+</button>
           </div>
         </div>
       </div></div>
@@ -229,7 +235,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
   <nav id="nav">
     <button class="nav-btn active" onclick="showPage('dashboard',this)"><span class="ico">📊</span><span>Início</span></button>
-    <button class="nav-btn" onclick="showPage('transacoes',this)"><span class="ico">💸</span><span>Despesas</span></button>
+    <button class="nav-btn" onclick="showPage('transacoes',this)"><span class="ico">💸</span><span>Caixa</span></button>
     <button class="nav-btn" onclick="showPage('apart',this)"><span class="ico">🏗️</span><span>Apê</span></button>
     <button class="nav-btn" onclick="showPage('config',this)"><span class="ico">⚙️</span><span>Config</span></button>
   </nav>
@@ -240,7 +246,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
 <div class="modal-overlay" id="modal-tx">
   <div class="modal">
-    <h2 id="modal-tx-title">Nova Transação</h2>
+    <h2 id="modal-tx-title">Nova Transação (Caixa)</h2>
     <div class="type-toggle">
       <button class="type-btn active receita" id="type-receita" onclick="setType('receita')">+ Receita</button>
       <button class="type-btn despesa" id="type-despesa" onclick="setType('despesa')">− Despesa</button>
@@ -266,27 +272,28 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     <div class="form-group">
       <label>Tipo</label>
       <select id="ap-tipo">
-        <option value="Parcela Entrada">🧱 Parcela Entrada</option>
-        <option value="Evolução de Obra">🏗️ Evolução de Obra</option>
-        <option value="Taxa Caixa">🏦 Taxa Caixa</option>
-        <option value="ITBI/Registro">📄 ITBI/Registro</option>
-        <option value="Personalização">🛠️ Personalização</option>
-      </select>
+        </select>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Valor (R$)</label><input id="ap-val" type="number" step="0.01" placeholder="0,00"/></div>
       <div class="form-group"><label>Vencimento (dia)</label><input id="ap-venc" type="number" min="1" max="31" placeholder="5"/></div>
     </div>
-    <div class="form-group"><label>Status</label><select id="ap-status"><option value="Pendente">⏳ Pendente</option><option value="Pago">✅ Pago</option></select></div>
+    <div class="form-group">
+      <label>Status Atual</label>
+      <select id="ap-status">
+        <option value="Pendente">⏳ Pendente (Mês Atual)</option>
+        <option value="Pago">✅ Pago (Mês Atual)</option>
+        <option value="Não Aplicável">⏸️ Não Aplicável (Ignorar no Total)</option>
+      </select>
+    </div>
     <button class="btn-primary" onclick="saveApart()">Salvar</button>
     <button class="btn-cancel" onclick="closeModal('modal-apart')">Cancelar</button>
   </div>
 </div>
 
-
 <script>
 // ============================================================
-// STATE ATUALIZADO COM CATEGORIAS DINÂMICAS
+// STATE ATUALIZADO 
 // ============================================================
 let state = {
   transacoes: [],
@@ -294,7 +301,8 @@ let state = {
   metas: [],
   categorias: {
     receitas: ['Salário Base', 'Consultoria', 'Freelance', 'Rendimentos', 'Outros'],
-    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Lazer', 'Outros']
+    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Lazer', 'Outros'],
+    ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
   config: { renda: 0 }
 };
@@ -304,8 +312,8 @@ function load() {
   const d = localStorage.getItem('finapp');
   if (d) {
       let parsed = JSON.parse(d);
-      // Garante que se o usuário for antigo, ele receba o objeto de categorias novo
       if(!parsed.categorias) parsed.categorias = state.categorias;
+      if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape; // Proteção para quem está atualizando
       state = { ...state, ...parsed };
   }
 }
@@ -316,7 +324,7 @@ const currentMonth = () => { const d = now(); return `${d.getFullYear()}-${Strin
 function txThisMonth() { const m = currentMonth(); return state.transacoes.filter(t => t.date && t.date.startsWith(m)); }
 
 // ============================================================
-// GESTÃO DE CATEGORIAS (NOVIDADE)
+// GESTÃO DE CATEGORIAS
 // ============================================================
 function renderConfigCategories() {
     const renderTags = (arr, tipoStr) => arr.map(cat => 
@@ -325,11 +333,14 @@ function renderConfigCategories() {
 
     document.getElementById('cat-receitas-list').innerHTML = renderTags(state.categorias.receitas, 'receitas');
     document.getElementById('cat-despesas-list').innerHTML = renderTags(state.categorias.despesas, 'despesas');
+    if(state.categorias.ape) {
+        document.getElementById('cat-ape-list').innerHTML = renderTags(state.categorias.ape, 'ape');
+    }
     updateModalCategoryDropdown();
 }
 
 function addCategoria(tipo) {
-    const inputId = tipo === 'receitas' ? 'new-cat-receita' : 'new-cat-despesa';
+    const inputId = tipo === 'receitas' ? 'new-cat-receita' : (tipo === 'despesas' ? 'new-cat-despesa' : 'new-cat-ape');
     const val = document.getElementById(inputId).value.trim();
     if(val && !state.categorias[tipo].includes(val)) {
         state.categorias[tipo].push(val);
@@ -348,9 +359,16 @@ function removeCategoria(tipo, nome) {
 }
 
 function updateModalCategoryDropdown() {
-    const select = document.getElementById('tx-cat');
+    // Dropdown de Transações
+    const selectTx = document.getElementById('tx-cat');
     const arr = txType === 'receita' ? state.categorias.receitas : state.categorias.despesas;
-    select.innerHTML = arr.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    if(selectTx) selectTx.innerHTML = arr.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
+    // Dropdown de Apartamento
+    const selectAp = document.getElementById('ap-tipo');
+    if(selectAp && state.categorias.ape) {
+        selectAp.innerHTML = state.categorias.ape.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
 }
 
 let txType = 'receita';
@@ -360,6 +378,12 @@ function setType(t) {
   document.getElementById('type-despesa').className = 'type-btn ' + (t==='despesa'?'active despesa':'');
   updateModalCategoryDropdown();
 }
+
+const getStatusBadge = (status) => {
+    if(status === 'Pago') return `<span class="apart-item-status status-pago">✅ Pago</span>`;
+    if(status === 'Não Aplicável') return `<span class="apart-item-status status-pausado">⏸️ Não Aplic.</span>`;
+    return `<span class="apart-item-status status-pend">⏳ Pendente</span>`;
+};
 
 // ============================================================
 // CORE (RENDER)
@@ -377,11 +401,16 @@ function renderDashboard() {
   let receita = 0, despesa = 0;
   txs.forEach(t => { if(t.type==='receita') receita+=t.val; else despesa+=t.val; });
 
-  const totalReceita = receita; // A renda extra conta para o saldo!
+  const totalReceita = receita;
   const saldo = totalReceita - despesa;
 
-  const moradia = state.apartamento.reduce((a,b) => a + (parseFloat(b.val)||0), 0);
-  const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita; // Usa cfg renda ou o q entrou no mes
+  // SOMA APENAS OS QUE NÃO SÃO "Não Aplicável"
+  const moradia = state.apartamento.reduce((a,b) => {
+      if(b.status === 'Não Aplicável') return a;
+      return a + (parseFloat(b.val)||0);
+  }, 0);
+
+  const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita;
   const pctMoradia = rendaBaseCalculo > 0 ? (moradia / rendaBaseCalculo * 100) : 0;
 
   document.getElementById('dash-receita').textContent = fmt(totalReceita);
@@ -398,14 +427,18 @@ function renderDashboard() {
 
   document.getElementById('apart-total').textContent = fmt(moradia);
 
+  const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
+  
   const al = document.getElementById('apart-list');
   al.innerHTML = state.apartamento.map(a => `
     <div class="apart-item">
       <div class="apart-item-left">
+        <div class="apart-item-icon">${apIcons[a.tipo] || '📄'}</div>
         <div><div class="apart-item-name">${a.tipo}</div><div class="apart-item-due">Vence dia ${a.venc||'—'}</div></div>
       </div>
       <div class="apart-item-right">
-        <div class="apart-item-val">${fmt(a.val)}</div><span class="apart-item-status ${a.status==='Pago'?'status-pago':'status-pend'}">${a.status==='Pago'?'✅ Pago':'⏳ Pendente'}</span>
+        <div class="apart-item-val ${a.status === 'Não Aplicável' ? 'paused' : ''}">${fmt(a.val)}</div>
+        ${getStatusBadge(a.status)}
       </div>
     </div>`).join('');
 
@@ -426,7 +459,7 @@ function txHTML(t) {
 function renderAllTx() {
   const all = [...state.transacoes].reverse();
   const el = document.getElementById('all-tx-list');
-  if (!all.length) el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação</div>';
+  if (!all.length) el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação no Caixa</div>';
   else el.innerHTML = all.map(t => `<div style="cursor:pointer" onclick="deleteTx(${t.id})">${txHTML(t)}</div>`).join('');
 }
 
@@ -435,8 +468,11 @@ function renderApartManage() {
   el.innerHTML = state.apartamento.map(a => `
     <div class="apart-section" style="margin-bottom:10px;">
       <div class="apart-header" style="cursor:pointer;" onclick="toggleApartStatus(${a.id})">
-        <div class="info"><h3>${a.tipo}</h3><p>Dia ${a.venc||'—'} • Toque para status</p></div>
-        <div style="text-align:right;"><div class="apart-total" style="font-size:16px;">${fmt(a.val)}</div><span class="apart-item-status ${a.status==='Pago'?'status-pago':'status-pend'}">${a.status}</span></div>
+        <div class="info"><h3>${a.tipo}</h3><p>Dia ${a.venc||'—'} • Toque para alterar status</p></div>
+        <div style="text-align:right;">
+            <div class="apart-total ${a.status === 'Não Aplicável' ? 'paused' : ''}" style="font-size:16px;">${fmt(a.val)}</div>
+            ${getStatusBadge(a.status)}
+        </div>
       </div>
       <div style="padding:10px 16px;display:flex;gap:8px;">
         <input type="number" step="0.01" value="${a.val||''}" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);" onchange="updateApartVal(${a.id}, this.value)"/>
@@ -458,7 +494,7 @@ function saveTx() {
   save(); closeModal('modal-tx'); refreshAll();
   document.getElementById('tx-desc').value = ''; document.getElementById('tx-val').value = '';
 }
-function deleteTx(id) { if(confirm('Remover transação?')) { state.transacoes = state.transacoes.filter(t => t.id !== id); save(); refreshAll(); } }
+function deleteTx(id) { if(confirm('Remover do fluxo de caixa?')) { state.transacoes = state.transacoes.filter(t => t.id !== id); save(); refreshAll(); } }
 
 function saveApart() {
   const tipo = document.getElementById('ap-tipo').value;
@@ -468,9 +504,19 @@ function saveApart() {
   state.apartamento.push({ id: Date.now(), tipo, val, venc, status });
   save(); closeModal('modal-apart'); refreshAll();
 }
-function toggleApartStatus(id) { const a = state.apartamento.find(x => x.id === id); if(a) { a.status = a.status === 'Pago'?'Pendente':'Pago'; save(); refreshAll(); } }
+
+function toggleApartStatus(id) { 
+    const a = state.apartamento.find(x => x.id === id); 
+    if(a) { 
+        if(a.status === 'Pendente') a.status = 'Pago';
+        else if(a.status === 'Pago') a.status = 'Não Aplicável';
+        else a.status = 'Pendente';
+        save(); refreshAll(); 
+    } 
+}
+
 function updateApartVal(id, v) { const a = state.apartamento.find(x => x.id === id); if(a) { a.val = parseFloat(v)||0; save(); renderDashboard(); renderApartManage(); } }
-function deleteApart(id) { if(confirm('Remover custo?')) { state.apartamento = state.apartamento.filter(x => x.id !== id); save(); refreshAll(); } }
+function deleteApart(id) { if(confirm('Remover custo do imóvel?')) { state.apartamento = state.apartamento.filter(x => x.id !== id); save(); refreshAll(); } }
 
 function saveConfig() { state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; save(); }
 
