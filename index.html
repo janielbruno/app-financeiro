@@ -439,7 +439,6 @@ function refreshAll() {
   try { renderConfigCategories(); } catch(e) { console.error(e); }
   try { 
       const cfgInput = document.getElementById('cfg-renda');
-      // Apenas preenche se não estivermos com o teclado clicado nele (Impede o bug)
       if(document.activeElement !== cfgInput) {
           cfgInput.value = state.config.renda || ''; 
       }
@@ -480,12 +479,10 @@ function renderDashboard() {
   const txs = txThisMonth();
   let receita = 0, despesa = 0; let chartDataMap = {};
   
-  // Variáveis para a Régua 50/30/20 Real
   let gasto50 = 0; 
   let gasto30 = 0;
   let gasto20 = 0;
 
-  // Categorias Mapeadas
   const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia'];
   const catsFuturo = ['Investimento'];
 
@@ -496,25 +493,20 @@ function renderDashboard() {
           despesa += t.val; 
           chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val; 
           
-          // Separação para a Régua 50/30/20
           if(catsNecessidades.includes(t.cat)) gasto50 += t.val;
           else if(catsFuturo.includes(t.cat)) gasto20 += t.val;
-          else gasto30 += t.val; // Lazer, Assinaturas e tudo que sobrar vai para Estilo de Vida
+          else gasto30 += t.val;
       }
   });
 
   const totalReceita = receita;
 
-  // CÁLCULO DOS CUSTOS DO APÊ (EXCLUI NÃO APLICÁVEIS)
   const moradia = state.apartamento.reduce((a,b) => {
       if(b.status === 'Não Aplicável') return a;
       return a + (parseFloat(b.val)||0);
   }, 0);
   
-  // Adiciona a moradia nas Necessidades (50%)
   gasto50 += moradia;
-  
-  // Saldo Livre = Tudo - Caixa - Apê
   const saldo = totalReceita - despesa - moradia;
 
   if(moradia > 0) chartDataMap['Apê/Obra'] = (chartDataMap['Apê/Obra'] || 0) + moradia;
@@ -542,19 +534,22 @@ function renderDashboard() {
   const teto20 = rendaBaseCalculo * 0.2;
   
   const limitPct50 = teto50 > 0 ? Math.min(100, (gasto50 / teto50) * 100) : 0;
-  document.getElementById('rule-50-text').textContent = `${fmt(gasto50)} / ${fmt(teto50)}`;
-  document.getElementById('rule-50-bar').style.width = limitPct50 + '%';
-  document.getElementById('rule-50-bar').style.background = limitPct50 >= 100 ? 'var(--red)' : 'var(--blue)';
+  const el50Text = document.getElementById('rule-50-text');
+  if(el50Text) el50Text.textContent = `${fmt(gasto50)} / ${fmt(teto50)}`;
+  const el50Bar = document.getElementById('rule-50-bar');
+  if(el50Bar) { el50Bar.style.width = limitPct50 + '%'; el50Bar.style.background = limitPct50 >= 100 ? 'var(--red)' : 'var(--blue)'; }
 
   const limitPct30 = teto30 > 0 ? Math.min(100, (gasto30 / teto30) * 100) : 0;
-  document.getElementById('rule-30-text').textContent = `${fmt(gasto30)} / ${fmt(teto30)}`;
-  document.getElementById('rule-30-bar').style.width = limitPct30 + '%';
-  document.getElementById('rule-30-bar').style.background = limitPct30 >= 100 ? 'var(--red)' : 'var(--orange)';
+  const el30Text = document.getElementById('rule-30-text');
+  if(el30Text) el30Text.textContent = `${fmt(gasto30)} / ${fmt(teto30)}`;
+  const el30Bar = document.getElementById('rule-30-bar');
+  if(el30Bar) { el30Bar.style.width = limitPct30 + '%'; el30Bar.style.background = limitPct30 >= 100 ? 'var(--red)' : 'var(--orange)'; }
 
   const limitPct20 = teto20 > 0 ? Math.min(100, (gasto20 / teto20) * 100) : 0;
-  document.getElementById('rule-20-text').textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
-  document.getElementById('rule-20-bar').style.width = limitPct20 + '%';
-  document.getElementById('rule-20-bar').style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)';
+  const el20Text = document.getElementById('rule-20-text');
+  if(el20Text) el20Text.textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
+  const el20Bar = document.getElementById('rule-20-bar');
+  if(el20Bar) { el20Bar.style.width = limitPct20 + '%'; el20Bar.style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)'; }
 
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
@@ -652,7 +647,6 @@ function deleteMeta(id) { state.metas = state.metas.filter(m => m.id !== id); sa
 function updateMetaGuard(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.guard = parseFloat(v)||0; save(); renderMetas(); } }
 function updateMetaAlvo(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.alvo = parseFloat(v)||0; save(); renderMetas(); } }
 
-// Agora o oninput não corta a digitação, pois a tela só atualiza visualmente com calma.
 function saveConfig() { 
     state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; 
     save(); 
