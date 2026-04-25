@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json"/>
 <title>Controle Financeiro - Imóvel na Planta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
   --bg: #0f1117; --bg2: #181b24; --bg3: #1e2230;
@@ -66,12 +67,18 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .sum-value.blue { color: var(--blue); }
 .sum-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
 
-/* PROGRESS */
+/* PROGRESS & RULERS */
 .progress-wrap { margin-top: 8px; }
 .progress-label { display:flex; justify-content:space-between; font-size:11px; color:var(--text2); margin-bottom:5px; }
 .progress-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
 .progress-fill.orange { background: linear-gradient(90deg, var(--orange), #ffd166); }
+
+.ruler-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.ruler-item:last-child { border-bottom: none; }
+.ruler-left h4 { font-size: 13px; font-weight: 600; }
+.ruler-left p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.ruler-right { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; }
 
 /* APARTMENT */
 .apart-section { background: linear-gradient(135deg, rgba(255,159,67,0.08), rgba(255,159,67,0.03)); border: 1px solid rgba(255,159,67,0.2); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
@@ -137,6 +144,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .setting-label { font-size:14px; font-weight:500; }
 .setting-sub { font-size:11px; color:var(--text2); margin-top:2px; }
 * { scrollbar-width:none; }
+
+/* CHART CONTAINER */
+.chart-container { position: relative; height: 200px; width: 100%; margin: 10px 0; display: flex; justify-content: center; align-items: center; }
 </style>
 </head>
 <body>
@@ -162,10 +172,34 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
         <div class="sum-card orange"><div class="sum-label">Custos do Apê</div><div class="sum-value orange" id="dash-moradia">R$ 0</div><div class="sum-sub" id="dash-pct-moradia">0% da renda</div></div>
       </div>
 
-      <div class="card" style="margin-bottom:12px;">
-        <div class="card-header"><span class="card-title">🏠 % do Imóvel na Renda</span><span style="font-size:12px;color:var(--text2);">ideal ≤ 30%</span></div>
+      <div class="card" style="margin-bottom:12px;" id="chart-card">
+        <div class="card-header"><span class="card-title">📊 Análise de Saídas (Mês Atual)</span></div>
         <div class="card-body">
-          <div class="progress-wrap"><div class="progress-label"><span id="pct-label">0%</span><span>30% ideal</span></div><div class="progress-bar"><div class="progress-fill orange" id="moradia-bar" style="width:0%"></div></div></div>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+            <div id="chart-empty" style="display:none; text-align:center; color:var(--text3); font-size:12px; padding:20px 0;">Adicione despesas para ver o gráfico.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">
+            <span class="card-title">⚖️ Teto de Gastos (Regra 50/30/20)</span>
+            <span style="font-size:12px;color:var(--text2);">Ideal do Mês</span>
+        </div>
+        <div class="card-body" style="padding-top: 8px;">
+          <div class="ruler-item">
+            <div class="ruler-left"><h4 style="color: var(--blue)">50% Necessidades</h4><p>Moradia, Apê, Mercado, Saúde</p></div>
+            <div class="ruler-right" id="rule-50">R$ 0</div>
+          </div>
+          <div class="ruler-item">
+            <div class="ruler-left"><h4 style="color: var(--orange)">30% Estilo de Vida</h4><p>Lazer, Jantares, Assinaturas</p></div>
+            <div class="ruler-right" id="rule-30">R$ 0</div>
+          </div>
+          <div class="ruler-item">
+            <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Chaves</h4><p>Móveis Planejados, Reserva</p></div>
+            <div class="ruler-right" id="rule-20">R$ 0</div>
+          </div>
         </div>
       </div>
 
@@ -224,7 +258,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       <p class="sec-title">Gerais</p>
       <div class="card"><div class="card-body" style="padding-top:4px;">
         <div class="setting-row">
-          <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base para cálculo de % do Apê</div></div>
+          <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base p/ cálculos e regra 50/30/20</div></div>
           <input id="cfg-renda" type="number" style="width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;text-align:right;" placeholder="0,00" oninput="saveConfig();refreshAll()"/>
         </div>
       </div></div>
@@ -307,13 +341,15 @@ let state = {
   config: { renda: 0 }
 };
 
+let myChart = null; // Variável global para armazenar o gráfico
+
 function save() { localStorage.setItem('finapp', JSON.stringify(state)); }
 function load() {
   const d = localStorage.getItem('finapp');
   if (d) {
       let parsed = JSON.parse(d);
       if(!parsed.categorias) parsed.categorias = state.categorias;
-      if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape; // Proteção para quem está atualizando
+      if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape;
       state = { ...state, ...parsed };
   }
 }
@@ -359,12 +395,10 @@ function removeCategoria(tipo, nome) {
 }
 
 function updateModalCategoryDropdown() {
-    // Dropdown de Transações
     const selectTx = document.getElementById('tx-cat');
     const arr = txType === 'receita' ? state.categorias.receitas : state.categorias.despesas;
     if(selectTx) selectTx.innerHTML = arr.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 
-    // Dropdown de Apartamento
     const selectAp = document.getElementById('ap-tipo');
     if(selectAp && state.categorias.ape) {
         selectAp.innerHTML = state.categorias.ape.map(cat => `<option value="${cat}">${cat}</option>`).join('');
@@ -386,7 +420,7 @@ const getStatusBadge = (status) => {
 };
 
 // ============================================================
-// CORE (RENDER)
+// CORE (RENDER) & GRÁFICOS
 // ============================================================
 function refreshAll() {
   renderDashboard();
@@ -396,23 +430,89 @@ function refreshAll() {
   document.getElementById('cfg-renda').value = state.config.renda || '';
 }
 
+function initChart(labels, data) {
+    const ctx = document.getElementById('expenseChart');
+    if(!ctx) return;
+
+    // Configuração de cores globais do Chart.js para combinar com o Dark Mode
+    Chart.defaults.color = '#9095b0';
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    
+    if (myChart) {
+        myChart.destroy(); // Destroi o anterior antes de criar novo
+    }
+
+    if(data.length === 0 || data.reduce((a,b)=>a+b,0) === 0) {
+        ctx.style.display = 'none';
+        document.getElementById('chart-empty').style.display = 'block';
+        return;
+    } else {
+        ctx.style.display = 'block';
+        document.getElementById('chart-empty').style.display = 'none';
+    }
+
+    // Paleta de cores vibrantes para o fundo escuro
+    const cores = ['#6C63FF', '#ff4d6d', '#ff9f43', '#48cae4', '#22d06a', '#9b43ff', '#f3a683', '#546de5', '#e15f41', '#c44569'];
+
+    myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: cores.slice(0, labels.length),
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } },
+                tooltip: { callbacks: { label: function(context) { return ' ' + fmt(context.raw); } } }
+            }
+        }
+    });
+}
+
 function renderDashboard() {
   const txs = txThisMonth();
   let receita = 0, despesa = 0;
-  txs.forEach(t => { if(t.type==='receita') receita+=t.val; else despesa+=t.val; });
+  let chartDataMap = {}; // Objeto para agrupar despesas por categoria
+
+  txs.forEach(t => { 
+      if(t.type==='receita') {
+          receita += t.val; 
+      } else {
+          despesa += t.val;
+          chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val;
+      }
+  });
 
   const totalReceita = receita;
   const saldo = totalReceita - despesa;
 
-  // SOMA APENAS OS QUE NÃO SÃO "Não Aplicável"
   const moradia = state.apartamento.reduce((a,b) => {
       if(b.status === 'Não Aplicável') return a;
       return a + (parseFloat(b.val)||0);
   }, 0);
 
+  // Adiciona o total da moradia no Gráfico
+  if(moradia > 0) {
+      chartDataMap['Apê/Obra'] = (chartDataMap['Apê/Obra'] || 0) + moradia;
+  }
+
+  // Prepara dados para o Chart.js
+  const chartLabels = Object.keys(chartDataMap);
+  const chartValues = Object.values(chartDataMap);
+  initChart(chartLabels, chartValues);
+
   const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita;
   const pctMoradia = rendaBaseCalculo > 0 ? (moradia / rendaBaseCalculo * 100) : 0;
 
+  // Atualiza Valores da Dashboard Principal
   document.getElementById('dash-receita').textContent = fmt(totalReceita);
   document.getElementById('dash-despesa').textContent = fmt(despesa);
   document.getElementById('dash-saldo').textContent = fmt(saldo);
@@ -426,6 +526,11 @@ function renderDashboard() {
   bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)';
 
   document.getElementById('apart-total').textContent = fmt(moradia);
+
+  // Atualiza a Régua 50/30/20
+  document.getElementById('rule-50').textContent = fmt(rendaBaseCalculo * 0.5);
+  document.getElementById('rule-30').textContent = fmt(rendaBaseCalculo * 0.3);
+  document.getElementById('rule-20').textContent = fmt(rendaBaseCalculo * 0.2);
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
   
@@ -518,7 +623,7 @@ function toggleApartStatus(id) {
 function updateApartVal(id, v) { const a = state.apartamento.find(x => x.id === id); if(a) { a.val = parseFloat(v)||0; save(); renderDashboard(); renderApartManage(); } }
 function deleteApart(id) { if(confirm('Remover custo do imóvel?')) { state.apartamento = state.apartamento.filter(x => x.id !== id); save(); refreshAll(); } }
 
-function saveConfig() { state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; save(); }
+function saveConfig() { state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; save(); refreshAll(); }
 
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
