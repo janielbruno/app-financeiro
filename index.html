@@ -358,7 +358,7 @@ let state = {
   ],
   categorias: {
     receitas: ['Salário Base', 'Consultoria', 'Freelance', 'Rendimentos', 'Outros'],
-    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Lazer', 'Investimento', 'Outros'],
+    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Farmácia', 'Alimentação', 'Lazer', 'Investimento', 'Outros'],
     ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
   config: { renda: 0 }
@@ -385,17 +385,26 @@ function txThisMonth() { const m = currentMonth(); return state.transacoes.filte
 
 function renderConfigCategories() {
     const renderTags = (arr, tipoStr) => arr.map(cat => `<div class="cat-tag">${cat} <button onclick="removeCategoria('${tipoStr}', '${cat}')">✕</button></div>`).join('');
-    document.getElementById('cat-receitas-list').innerHTML = renderTags(state.categorias.receitas, 'receitas');
-    document.getElementById('cat-despesas-list').innerHTML = renderTags(state.categorias.despesas, 'despesas');
-    if(state.categorias.ape) document.getElementById('cat-ape-list').innerHTML = renderTags(state.categorias.ape, 'ape');
+    
+    const elRec = document.getElementById('cat-receitas-list');
+    if(elRec) elRec.innerHTML = renderTags(state.categorias.receitas, 'receitas');
+    
+    const elDes = document.getElementById('cat-despesas-list');
+    if(elDes) elDes.innerHTML = renderTags(state.categorias.despesas, 'despesas');
+    
+    const elApe = document.getElementById('cat-ape-list');
+    if(elApe && state.categorias.ape) elApe.innerHTML = renderTags(state.categorias.ape, 'ape');
+    
     updateModalCategoryDropdown();
 }
 
 function addCategoria(tipo) {
     const inputId = tipo === 'receitas' ? 'new-cat-receita' : (tipo === 'despesas' ? 'new-cat-despesa' : 'new-cat-ape');
-    const val = document.getElementById(inputId).value.trim();
+    const el = document.getElementById(inputId);
+    if(!el) return;
+    const val = el.value.trim();
     if(val && !state.categorias[tipo].includes(val)) {
-        state.categorias[tipo].push(val); save(); renderConfigCategories(); document.getElementById(inputId).value = '';
+        state.categorias[tipo].push(val); save(); renderConfigCategories(); el.value = '';
     }
 }
 
@@ -417,8 +426,12 @@ function updateModalCategoryDropdown() {
 let txType = 'receita';
 function setType(t) {
   txType = t;
-  document.getElementById('type-receita').className = 'type-btn ' + (t==='receita'?'active receita':'');
-  document.getElementById('type-despesa').className = 'type-btn ' + (t==='despesa'?'active despesa':'');
+  const btnRec = document.getElementById('type-receita');
+  if(btnRec) btnRec.className = 'type-btn ' + (t==='receita'?'active receita':'');
+  
+  const btnDes = document.getElementById('type-despesa');
+  if(btnDes) btnDes.className = 'type-btn ' + (t==='despesa'?'active despesa':'');
+  
   updateModalCategoryDropdown();
 }
 
@@ -432,17 +445,17 @@ const getStatusBadge = (status) => {
 // CORE COM PROTEÇÃO E REGRA 50/30/20 DINÂMICA
 // ============================================================
 function refreshAll() {
-  try { renderDashboard(); } catch(e) { console.error(e); }
-  try { renderAllTx(); } catch(e) { console.error(e); }
-  try { renderApartManage(); } catch(e) { console.error(e); }
-  try { renderMetas(); } catch(e) { console.error(e); }
-  try { renderConfigCategories(); } catch(e) { console.error(e); }
+  try { renderDashboard(); } catch(e) { console.error('Dashboard Error', e); }
+  try { renderAllTx(); } catch(e) { console.error('Tx Error', e); }
+  try { renderApartManage(); } catch(e) { console.error('Apart Error', e); }
+  try { renderMetas(); } catch(e) { console.error('Metas Error', e); }
+  try { renderConfigCategories(); } catch(e) { console.error('Categories Error', e); }
   try { 
       const cfgInput = document.getElementById('cfg-renda');
-      if(document.activeElement !== cfgInput) {
+      if(cfgInput && document.activeElement !== cfgInput) {
           cfgInput.value = state.config.renda || ''; 
       }
-  } catch(e) {}
+  } catch(e) { console.error('Config Error', e); }
 }
 
 function initChart(labels, data) {
@@ -451,10 +464,15 @@ function initChart(labels, data) {
         const ctx = document.getElementById('expenseChart');
         if(!ctx) return;
 
+        const emptyEl = document.getElementById('chart-empty');
+
         if(data.length === 0 || data.reduce((a,b)=>a+b,0) === 0) {
-            ctx.style.display = 'none'; document.getElementById('chart-empty').style.display = 'block'; return;
+            ctx.style.display = 'none'; 
+            if(emptyEl) emptyEl.style.display = 'block'; 
+            return;
         } else {
-            ctx.style.display = 'block'; document.getElementById('chart-empty').style.display = 'none';
+            ctx.style.display = 'block'; 
+            if(emptyEl) emptyEl.style.display = 'none';
         }
 
         const cores = ['#6C63FF', '#ff4d6d', '#ff9f43', '#48cae4', '#22d06a', '#9b43ff', '#f3a683', '#546de5', '#e15f41', '#c44569'];
@@ -472,7 +490,7 @@ function initChart(labels, data) {
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }, tooltip: { callbacks: { label: function(context) { return ' ' + fmt(context.raw); } } } } }
             });
         }
-    } catch(err) { console.error(err); }
+    } catch(err) { console.error('Chart Error', err); }
 }
 
 function renderDashboard() {
@@ -483,7 +501,8 @@ function renderDashboard() {
   let gasto30 = 0;
   let gasto20 = 0;
 
-  const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia'];
+  // Mapeamento Inteligente
+  const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia', 'Alimentação'];
   const catsFuturo = ['Investimento'];
 
   txs.forEach(t => { 
@@ -516,19 +535,23 @@ function renderDashboard() {
   const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita;
   const pctMoradia = rendaBaseCalculo > 0 ? (moradia / rendaBaseCalculo * 100) : 0;
 
-  document.getElementById('dash-receita').textContent = fmt(totalReceita); 
-  document.getElementById('dash-despesa').textContent = fmt(despesa);
-  document.getElementById('dash-saldo').textContent = fmt(saldo); 
-  document.getElementById('dash-moradia').textContent = fmt(moradia);
+  const elRec = document.getElementById('dash-receita'); if(elRec) elRec.textContent = fmt(totalReceita); 
+  const elDes = document.getElementById('dash-despesa'); if(elDes) elDes.textContent = fmt(despesa);
+  const elSal = document.getElementById('dash-saldo'); if(elSal) elSal.textContent = fmt(saldo); 
+  const elMor = document.getElementById('dash-moradia'); if(elMor) elMor.textContent = fmt(moradia);
   
-  document.getElementById('dash-pct-moradia').textContent = pctMoradia.toFixed(1) + '% da renda base';
-  document.getElementById('pct-label').textContent = pctMoradia.toFixed(1) + '%';
+  const elPctMor = document.getElementById('dash-pct-moradia'); if(elPctMor) elPctMor.textContent = pctMoradia.toFixed(1) + '% da renda base';
+  const elPctLbl = document.getElementById('pct-label'); if(elPctLbl) elPctLbl.textContent = pctMoradia.toFixed(1) + '%';
   
-  const bar = document.getElementById('moradia-bar'); bar.style.width = Math.min(pctMoradia / 30 * 100, 100) + '%';
-  bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)';
-  document.getElementById('apart-total').textContent = fmt(moradia);
+  const bar = document.getElementById('moradia-bar'); 
+  if(bar) {
+      bar.style.width = Math.min(pctMoradia / 30 * 100, 100) + '%';
+      bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)';
+  }
+  
+  const elApTot = document.getElementById('apart-total'); if(elApTot) elApTot.textContent = fmt(moradia);
 
-  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA
+  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA COM PROTEÇÃO
   const teto50 = rendaBaseCalculo * 0.5;
   const teto30 = rendaBaseCalculo * 0.3;
   const teto20 = rendaBaseCalculo * 0.2;
@@ -554,14 +577,20 @@ function renderDashboard() {
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
   
-  document.getElementById('apart-list').innerHTML = state.apartamento.map(a => `
-    <div class="apart-item">
-      <div class="apart-item-left"><div class="apart-item-icon">${apIcons[a.tipo] || '📄'}</div><div><div class="apart-item-name">${a.tipo}</div><div class="apart-item-due">Vence dia ${a.venc||'—'}</div></div></div>
-      <div class="apart-item-right"><div class="apart-item-val ${a.status === 'Não Aplicável' ? 'paused' : ''}">${fmt(a.val)}</div>${getStatusBadge(a.status)}</div>
-    </div>`).join('');
+  const elApList = document.getElementById('apart-list');
+  if(elApList) {
+      elApList.innerHTML = state.apartamento.map(a => `
+        <div class="apart-item">
+          <div class="apart-item-left"><div class="apart-item-icon">${apIcons[a.tipo] || '📄'}</div><div><div class="apart-item-name">${a.tipo}</div><div class="apart-item-due">Vence dia ${a.venc||'—'}</div></div></div>
+          <div class="apart-item-right"><div class="apart-item-val ${a.status === 'Não Aplicável' ? 'paused' : ''}">${fmt(a.val)}</div>${getStatusBadge(a.status)}</div>
+        </div>`).join('');
+  }
 
   const recent = [...state.transacoes].reverse().slice(0, 10);
-  document.getElementById('recent-list').innerHTML = recent.length ? recent.map(t => txHTML(t)).join('') : '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação</div>';
+  const elRecList = document.getElementById('recent-list');
+  if(elRecList) {
+      elRecList.innerHTML = recent.length ? recent.map(t => txHTML(t)).join('') : '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação</div>';
+  }
 }
 
 function txHTML(t) {
@@ -577,12 +606,15 @@ function txHTML(t) {
 function renderAllTx() {
   const all = [...state.transacoes].reverse();
   const el = document.getElementById('all-tx-list');
+  if(!el) return;
   if (!all.length) el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação no Caixa</div>';
   else el.innerHTML = all.map(t => `<div style="cursor:pointer" onclick="deleteTx(${t.id})">${txHTML(t)}</div>`).join('');
 }
 
 function renderApartManage() {
-  document.getElementById('apart-manage-list').innerHTML = state.apartamento.map(a => `
+  const el = document.getElementById('apart-manage-list');
+  if(!el) return;
+  el.innerHTML = state.apartamento.map(a => `
     <div class="apart-section" style="margin-bottom:10px;">
       <div class="apart-header" style="cursor:pointer;" onclick="toggleApartStatus(${a.id})">
         <div class="info"><h3>${a.tipo}</h3><p>Dia ${a.venc||'—'} • Toque para alterar status</p></div>
@@ -597,6 +629,7 @@ function renderApartManage() {
 
 function renderMetas() {
   const el = document.getElementById('metas-list');
+  if(!el) return;
   if (!state.metas.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);">Nenhuma meta criada</div>'; return; }
   el.innerHTML = state.metas.map(m => {
     const pct = m.alvo > 0 ? Math.min(100, m.guard / m.alvo * 100) : 0; const falta = Math.max(0, m.alvo - m.guard); const color = pct >= 100 ? 'green' : pct >= 50 ? 'orange' : 'red';
@@ -648,7 +681,8 @@ function updateMetaGuard(id, v) { const m = state.metas.find(x => x.id === id); 
 function updateMetaAlvo(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.alvo = parseFloat(v)||0; save(); renderMetas(); } }
 
 function saveConfig() { 
-    state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; 
+    const el = document.getElementById('cfg-renda');
+    if(el) state.config.renda = parseFloat(el.value) || 0; 
     save(); 
     setTimeout(refreshAll, 100); 
 }
@@ -656,24 +690,49 @@ function saveConfig() {
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active'); btn.classList.add('active'); document.getElementById('content').scrollTop = 0;
+  
+  const elPage = document.getElementById('page-' + name);
+  if(elPage) elPage.classList.add('active'); 
+  
+  if(btn) btn.classList.add('active'); 
+  
+  const elContent = document.getElementById('content');
+  if(elContent) elContent.scrollTop = 0;
+  
   if (name === 'dashboard') refreshAll();
 }
 
-function openTxModal() { document.getElementById('tx-date').value = new Date().toISOString().split('T')[0]; setType('despesa'); openModal('modal-tx'); }
+function openTxModal() { 
+    const el = document.getElementById('tx-date');
+    if(el) el.value = new Date().toISOString().split('T')[0]; 
+    setType('despesa'); 
+    openModal('modal-tx'); 
+}
 function openApartModal() { openModal('modal-apart'); }
 function openMetaModal() { openModal('modal-meta'); }
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }); });
+
+function openModal(id) { 
+    const el = document.getElementById(id);
+    if(el) el.classList.add('open'); 
+}
+function closeModal(id) { 
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('open'); 
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o => { 
+    o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }); 
+});
 
 function init() {
   load();
   const d = now(); const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  document.getElementById('current-month').textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+  const elMonth = document.getElementById('current-month');
+  if(elMonth) elMonth.textContent = months[d.getMonth()] + ' ' + d.getFullYear();
   refreshAll();
 }
-init();
+
+window.onload = init;
 </script>
 </body>
 </html>
