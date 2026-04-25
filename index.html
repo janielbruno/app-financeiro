@@ -68,7 +68,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .progress-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
 .progress-fill.orange { background: linear-gradient(90deg, var(--orange), #ffd166); }
 
-/* REGRA 50/30/20 ATUALIZADA */
+/* REGRA 50/30/20 */
 .ruler-item { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .ruler-item:last-child { border-bottom: none; }
 .ruler-item-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -199,7 +199,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
           <div class="ruler-item">
             <div class="ruler-item-top">
-              <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Metas</h4><p>Investimentos, Educação e Cursos</p></div>
+              <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Metas</h4><p>Investimentos, Educação e Ferramentas</p></div>
               <div class="ruler-right" id="rule-20-text">R$ 0 / R$ 0</div>
             </div>
             <div class="progress-bar" style="height:4px;"><div class="progress-fill" id="rule-20-bar" style="width:0%; background:var(--green);"></div></div>
@@ -223,7 +223,44 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     </div>
 
     <div class="page" id="page-apart">
-      <p class="sec-title">Gerir Custos do Imóvel</p>
+      
+      <p class="sec-title">Financiamento & INCC</p>
+      <div class="card">
+        <div class="card-body" style="padding-top:14px;">
+          <div class="form-group">
+            <label>Saldo Devedor Atual (R$)</label>
+            <input id="sim-saldo" type="number" step="0.01" placeholder="Ex: 150000.00" oninput="calcINCC()" onchange="saveSaldo()"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Taxa INCC Mensal (%)</label>
+              <input id="sim-incc" type="number" step="0.01" placeholder="Ex: 0.50" oninput="calcINCC()"/>
+            </div>
+            <div class="form-group">
+              <label>Correção da Dívida</label>
+              <div id="sim-incc-result" style="font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--red); padding-top:8px;">+ R$ 0,00</div>
+            </div>
+          </div>
+          <div style="font-size:10px; color:var(--text2); margin-top:5px; line-height:1.4;">O INCC corrige o saldo devedor do imóvel na planta todos os meses até à entrega das chaves.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">💡 Simulador de Amortização</span></div>
+        <div class="card-body" style="padding-top:0;">
+          <div class="form-group">
+            <label>Se eu antecipar / amortizar hoje (R$):</label>
+            <input id="sim-amort" type="number" step="0.01" placeholder="Ex: 5000.00" oninput="calcAmortizacao()"/>
+          </div>
+          <div style="background:var(--green-bg); padding:12px; border-radius:8px;">
+            <div style="font-size:12px; color:var(--green); font-weight:600; margin-bottom:4px;">Poupança estimada em juros:</div>
+            <div id="sim-amort-save" style="font-family:'Space Mono',monospace; font-size:18px; font-weight:700; color:var(--green);">R$ 0,00</div>
+            <div style="font-size:10px; color:var(--text2); margin-top:6px; line-height:1.4;">*Estimativa baseada num financiamento de 30 anos (MCMV). Cada R$ 1 amortizado agora poupa aprox. R$ 2,50 a R$ 3,00 em juros futuros.</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="sec-title">Gerir Custos da Obra</p>
       <div id="apart-manage-list"></div>
       <button class="btn-primary" onclick="openApartModal()" style="margin-top:4px;">+ Adicionar Custo da Obra</button>
     </div>
@@ -361,7 +398,7 @@ let state = {
     despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Farmácia', 'Alimentação', 'Lazer', 'Investimento', 'Educação', 'Ferramentas/Trabalho', 'Outros'],
     ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
-  config: { renda: 0 }
+  config: { renda: 0, saldoDevedor: 0 }
 };
 
 let myChart = null; 
@@ -374,9 +411,9 @@ function load() {
       if(!parsed.categorias) parsed.categorias = state.categorias;
       if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape;
       if(!parsed.metas) parsed.metas = state.metas;
+      if(!parsed.config) parsed.config = state.config;
       state = { ...state, ...parsed };
       
-      // Garante que se o utilizador já tinha o state salvo sem Educação, ela seja adicionada:
       if(!state.categorias.despesas.includes('Educação')) state.categorias.despesas.push('Educação');
       if(!state.categorias.despesas.includes('Ferramentas/Trabalho')) state.categorias.despesas.push('Ferramentas/Trabalho');
   }
@@ -446,6 +483,41 @@ const getStatusBadge = (status) => {
 };
 
 // ============================================================
+// SIMULADORES E INCC
+// ============================================================
+function calcINCC() {
+    const saldoEl = document.getElementById('sim-saldo');
+    const inccEl = document.getElementById('sim-incc');
+    if(!saldoEl || !inccEl) return;
+    
+    const saldo = parseFloat(saldoEl.value) || 0;
+    const taxa = parseFloat(inccEl.value) || 0;
+    const correcao = saldo * (taxa / 100);
+    
+    const resultEl = document.getElementById('sim-incc-result');
+    if(resultEl) resultEl.textContent = '+ ' + fmt(correcao);
+}
+
+function calcAmortizacao() {
+    const amortEl = document.getElementById('sim-amort');
+    if(!amortEl) return;
+    
+    const amort = parseFloat(amortEl.value) || 0;
+    const economia = amort * 2.8; // Multiplicador estimado para o MCMV a longo prazo
+    
+    const saveEl = document.getElementById('sim-amort-save');
+    if(saveEl) saveEl.textContent = fmt(economia);
+}
+
+function saveSaldo() {
+    const saldoEl = document.getElementById('sim-saldo');
+    if(saldoEl) {
+        state.config.saldoDevedor = parseFloat(saldoEl.value) || 0;
+        save();
+    }
+}
+
+// ============================================================
 // CORE COM PROTEÇÃO E REGRA 50/30/20 DINÂMICA
 // ============================================================
 function refreshAll() {
@@ -505,7 +577,6 @@ function renderDashboard() {
   let gasto30 = 0;
   let gasto20 = 0;
 
-  // MAPEAMENTO INTELIGENTE (ATUALIZADO)
   const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia', 'Alimentação'];
   const catsFuturo = ['Investimento', 'Educação', 'Ferramentas/Trabalho', 'Cursos'];
 
@@ -555,7 +626,6 @@ function renderDashboard() {
   
   const elApTot = document.getElementById('apart-total'); if(elApTot) elApTot.textContent = fmt(moradia);
 
-  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA
   const teto50 = rendaBaseCalculo * 0.5;
   const teto30 = rendaBaseCalculo * 0.3;
   const teto20 = rendaBaseCalculo * 0.2;
@@ -577,7 +647,6 @@ function renderDashboard() {
   if(el20Text) el20Text.textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
   const el20Bar = document.getElementById('rule-20-bar');
   if(el20Bar) { el20Bar.style.width = limitPct20 + '%'; el20Bar.style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)'; }
-
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
   
@@ -733,6 +802,13 @@ function init() {
   const d = now(); const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const elMonth = document.getElementById('current-month');
   if(elMonth) elMonth.textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+  
+  const simSaldoEl = document.getElementById('sim-saldo');
+  if(simSaldoEl && state.config.saldoDevedor) {
+      simSaldoEl.value = state.config.saldoDevedor;
+      calcINCC();
+  }
+  
   refreshAll();
 }
 
