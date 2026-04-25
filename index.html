@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Meu Apê"/>
 <link rel="manifest" href="manifest.json"/>
-<title>Controle Financeiro - Imóvel na Planta</title>
+<title>Controlo Financeiro - Imóvel na Planta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -153,7 +153,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
         <h1>💰 Minhas Finanças</h1>
-        <p>Controle pessoal • Imóvel na Planta</p>
+        <p>Controlo pessoal • Imóvel na Planta</p>
       </div>
       <div id="month-badge">📅 <span id="current-month"></span></div>
     </div>
@@ -199,7 +199,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
           <div class="ruler-item">
             <div class="ruler-item-top">
-              <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Metas</h4><p>Investimentos</p></div>
+              <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Metas</h4><p>Investimentos, Educação e Cursos</p></div>
               <div class="ruler-right" id="rule-20-text">R$ 0 / R$ 0</div>
             </div>
             <div class="progress-bar" style="height:4px;"><div class="progress-fill" id="rule-20-bar" style="width:0%; background:var(--green);"></div></div>
@@ -223,7 +223,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     </div>
 
     <div class="page" id="page-apart">
-      <p class="sec-title">Gerenciar Custos do Imóvel</p>
+      <p class="sec-title">Gerir Custos do Imóvel</p>
       <div id="apart-manage-list"></div>
       <button class="btn-primary" onclick="openApartModal()" style="margin-top:4px;">+ Adicionar Custo da Obra</button>
     </div>
@@ -358,7 +358,7 @@ let state = {
   ],
   categorias: {
     receitas: ['Salário Base', 'Consultoria', 'Freelance', 'Rendimentos', 'Outros'],
-    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Farmácia', 'Alimentação', 'Lazer', 'Investimento', 'Outros'],
+    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Farmácia', 'Alimentação', 'Lazer', 'Investimento', 'Educação', 'Ferramentas/Trabalho', 'Outros'],
     ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
   config: { renda: 0 }
@@ -375,10 +375,14 @@ function load() {
       if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape;
       if(!parsed.metas) parsed.metas = state.metas;
       state = { ...state, ...parsed };
+      
+      // Garante que se o utilizador já tinha o state salvo sem Educação, ela seja adicionada:
+      if(!state.categorias.despesas.includes('Educação')) state.categorias.despesas.push('Educação');
+      if(!state.categorias.despesas.includes('Ferramentas/Trabalho')) state.categorias.despesas.push('Ferramentas/Trabalho');
   }
 }
 
-const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
 const now = () => new Date();
 const currentMonth = () => { const d = now(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
 function txThisMonth() { const m = currentMonth(); return state.transacoes.filter(t => t.date && t.date.startsWith(m)); }
@@ -501,9 +505,9 @@ function renderDashboard() {
   let gasto30 = 0;
   let gasto20 = 0;
 
-  // Mapeamento Inteligente
+  // MAPEAMENTO INTELIGENTE (ATUALIZADO)
   const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia', 'Alimentação'];
-  const catsFuturo = ['Investimento'];
+  const catsFuturo = ['Investimento', 'Educação', 'Ferramentas/Trabalho', 'Cursos'];
 
   txs.forEach(t => { 
       if(t.type==='receita') { 
@@ -551,7 +555,7 @@ function renderDashboard() {
   
   const elApTot = document.getElementById('apart-total'); if(elApTot) elApTot.textContent = fmt(moradia);
 
-  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA COM PROTEÇÃO
+  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA
   const teto50 = rendaBaseCalculo * 0.5;
   const teto30 = rendaBaseCalculo * 0.3;
   const teto20 = rendaBaseCalculo * 0.2;
