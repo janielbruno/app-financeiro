@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Meu Apê"/>
 <link rel="manifest" href="manifest.json"/>
-<title>Controle Financeiro - Imóvel na Planta</title>
+<title>Controlo Financeiro - Imóvel na Planta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -32,6 +32,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 #header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 #header p { font-size: 12px; color: var(--text2); margin-top: 2px; }
 #month-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: #fff; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-top: 10px; }
+.month-btn { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; padding: 0 5px; }
 
 #content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 16px 100px; scroll-behavior: smooth; }
 #content::-webkit-scrollbar { display: none; }
@@ -105,6 +106,12 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .tx-val.neg { color:var(--red); }
 .sec-title { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin:16px 0 10px; }
 
+/* QUICK ADD */
+.quick-add-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+.quick-add-scroll::-webkit-scrollbar { display: none; }
+.quick-chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; cursor: pointer; transition: background 0.2s; }
+.quick-chip:active { background: var(--accent); color: #fff; }
+
 .meta-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:14px 16px; margin-bottom:10px; }
 .meta-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .meta-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
@@ -155,7 +162,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
         <h1>💰 Minhas Finanças</h1>
         <p>Controlo pessoal • Imóvel na Planta</p>
       </div>
-      <div id="month-badge">📅 <span id="current-month"></span></div>
+      <div id="month-badge">
+        <button class="month-btn" onclick="changeMonth(-1)">◀</button>
+        <span id="current-month"></span>
+        <button class="month-btn" onclick="changeMonth(1)">▶</button>
+      </div>
     </div>
   </div>
 
@@ -170,7 +181,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
 
       <div class="card" style="margin-bottom:12px;" id="chart-card">
-        <div class="card-header"><span class="card-title">📊 Análise de Saídas (Mês Atual)</span></div>
+        <div class="card-header"><span class="card-title">📊 Análise de Saídas</span></div>
         <div class="card-body">
             <div class="chart-container"><canvas id="expenseChart"></canvas></div>
             <div id="chart-empty" style="display:none; text-align:center; color:var(--text3); font-size:12px; padding:20px 0;">Adicione despesas para ver o gráfico.</div>
@@ -178,7 +189,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
 
       <div class="card" style="margin-bottom:12px;">
-        <div class="card-header"><span class="card-title">⚖️ Teto de Gastos (Regra 50/30/20)</span><span style="font-size:12px;color:var(--text2);">Gasto vs Limite Atual</span></div>
+        <div class="card-header"><span class="card-title">⚖️ Teto de Gastos (Regra 50/30/20)</span><span style="font-size:12px;color:var(--text2);">Gasto vs Limite</span></div>
         <div class="card-body" style="padding-top: 8px;">
           
           <div class="ruler-item">
@@ -209,16 +220,20 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
 
       <div class="apart-section">
-        <div class="apart-header"><div class="icon">🏗️</div><div class="info"><h3>Evolução do Imóvel</h3><p>Custos ativos (Mês)</p></div><div class="apart-total" id="apart-total">R$ 0</div></div>
+        <div class="apart-header"><div class="icon">🏗️</div><div class="info"><h3>Evolução do Imóvel</h3><p>Custos ativos do mês</p></div><div class="apart-total" id="apart-total">R$ 0</div></div>
         <div id="apart-list"></div>
       </div>
-
-      <p class="sec-title">Últimas Movimentações (Caixa)</p>
-      <div class="card"><div class="card-body" style="padding-top:8px;" id="recent-list"></div></div>
     </div>
 
     <div class="page" id="page-transacoes">
-      <p class="sec-title">Todo o Fluxo de Caixa</p>
+      <p class="sec-title">Lançamento Rápido</p>
+      <div class="quick-add-scroll">
+        <button class="quick-chip" onclick="quickAdd('despesa', 'Alimentação', 'Café/Lanche', 15)">☕ Café (15)</button>
+        <button class="quick-chip" onclick="quickAdd('despesa', 'Transporte', 'Uber/App', 30)">🚗 Uber (30)</button>
+        <button class="quick-chip" onclick="quickAdd('despesa', 'Alimentação', 'iFood/Delivery', 50)">🍔 iFood (50)</button>
+      </div>
+
+      <p class="sec-title" style="margin-top:16px;">Todo o Fluxo de Caixa</p>
       <div class="card"><div class="card-body" style="padding-top:8px;" id="all-tx-list"></div></div>
     </div>
 
@@ -302,11 +317,15 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
         </div>
       </div></div>
 
-      <p class="sec-title">Gerais</p>
+      <p class="sec-title">Gerais e Dados</p>
       <div class="card"><div class="card-body" style="padding-top:4px;">
         <div class="setting-row">
           <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base p/ cálculos e teto 50/30/20</div></div>
           <input id="cfg-renda" type="number" style="width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;text-align:right;" placeholder="0,00" oninput="saveConfig()"/>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Exportar Histórico</div><div class="setting-sub">Planilha CSV para Excel/Sheets</div></div>
+          <button onclick="exportCSV()" style="background:var(--blue-bg);color:var(--blue);border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;">Baixar CSV</button>
         </div>
       </div></div>
     </div>
@@ -402,6 +421,7 @@ let state = {
 };
 
 let myChart = null; 
+let viewingDate = new Date(); // Nova variável para controlo do mês
 
 function save() { localStorage.setItem('finapp', JSON.stringify(state)); }
 function load() {
@@ -413,29 +433,54 @@ function load() {
       if(!parsed.metas) parsed.metas = state.metas;
       if(!parsed.config) parsed.config = state.config;
       state = { ...state, ...parsed };
-      
-      if(!state.categorias.despesas.includes('Educação')) state.categorias.despesas.push('Educação');
-      if(!state.categorias.despesas.includes('Ferramentas/Trabalho')) state.categorias.despesas.push('Ferramentas/Trabalho');
   }
 }
 
 const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
-const now = () => new Date();
-const currentMonth = () => { const d = now(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-function txThisMonth() { const m = currentMonth(); return state.transacoes.filter(t => t.date && t.date.startsWith(m)); }
+const getViewingMonthStr = () => { return `${viewingDate.getFullYear()}-${String(viewingDate.getMonth()+1).padStart(2,'0')}`; };
+function txThisMonth() { const m = getViewingMonthStr(); return state.transacoes.filter(t => t.date && t.date.startsWith(m)); }
+
+function changeMonth(delta) {
+    viewingDate.setMonth(viewingDate.getMonth() + delta);
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const elMonth = document.getElementById('current-month');
+    if(elMonth) elMonth.textContent = months[viewingDate.getMonth()] + ' ' + viewingDate.getFullYear();
+    refreshAll();
+}
+
+function exportCSV() {
+    let csv = "Data,Tipo,Categoria,Descricao,Valor\n";
+    state.transacoes.forEach(t => {
+        csv += `${t.date},${t.type},${t.cat},${t.desc.replace(/,/g, '')},${t.val}\n`;
+    });
+    // Opcional: Adicionar os custos ativos do Apê
+    state.apartamento.forEach(a => {
+        if(a.status !== 'Não Aplicável') {
+            csv += `Recorrente,despesa,Apê/Obra,${a.tipo.replace(/,/g, '')},${a.val}\n`;
+        }
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'historico_financas.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function quickAdd(type, cat, desc, val) {
+    const date = new Date().toISOString().split('T')[0];
+    state.transacoes.push({ id: Date.now(), type, desc, val, date, cat });
+    save(); refreshAll();
+}
 
 function renderConfigCategories() {
     const renderTags = (arr, tipoStr) => arr.map(cat => `<div class="cat-tag">${cat} <button onclick="removeCategoria('${tipoStr}', '${cat}')">✕</button></div>`).join('');
-    
-    const elRec = document.getElementById('cat-receitas-list');
-    if(elRec) elRec.innerHTML = renderTags(state.categorias.receitas, 'receitas');
-    
-    const elDes = document.getElementById('cat-despesas-list');
-    if(elDes) elDes.innerHTML = renderTags(state.categorias.despesas, 'despesas');
-    
-    const elApe = document.getElementById('cat-ape-list');
-    if(elApe && state.categorias.ape) elApe.innerHTML = renderTags(state.categorias.ape, 'ape');
-    
+    const elRec = document.getElementById('cat-receitas-list'); if(elRec) elRec.innerHTML = renderTags(state.categorias.receitas, 'receitas');
+    const elDes = document.getElementById('cat-despesas-list'); if(elDes) elDes.innerHTML = renderTags(state.categorias.despesas, 'despesas');
+    const elApe = document.getElementById('cat-ape-list'); if(elApe && state.categorias.ape) elApe.innerHTML = renderTags(state.categorias.ape, 'ape');
     updateModalCategoryDropdown();
 }
 
@@ -444,9 +489,7 @@ function addCategoria(tipo) {
     const el = document.getElementById(inputId);
     if(!el) return;
     const val = el.value.trim();
-    if(val && !state.categorias[tipo].includes(val)) {
-        state.categorias[tipo].push(val); save(); renderConfigCategories(); el.value = '';
-    }
+    if(val && !state.categorias[tipo].includes(val)) { state.categorias[tipo].push(val); save(); renderConfigCategories(); el.value = ''; }
 }
 
 function removeCategoria(tipo, nome) {
@@ -456,10 +499,8 @@ function removeCategoria(tipo, nome) {
 }
 
 function updateModalCategoryDropdown() {
-    const selectTx = document.getElementById('tx-cat');
-    const arr = txType === 'receita' ? state.categorias.receitas : state.categorias.despesas;
+    const selectTx = document.getElementById('tx-cat'); const arr = txType === 'receita' ? state.categorias.receitas : state.categorias.despesas;
     if(selectTx) selectTx.innerHTML = arr.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-
     const selectAp = document.getElementById('ap-tipo');
     if(selectAp && state.categorias.ape) selectAp.innerHTML = state.categorias.ape.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 }
@@ -467,12 +508,8 @@ function updateModalCategoryDropdown() {
 let txType = 'receita';
 function setType(t) {
   txType = t;
-  const btnRec = document.getElementById('type-receita');
-  if(btnRec) btnRec.className = 'type-btn ' + (t==='receita'?'active receita':'');
-  
-  const btnDes = document.getElementById('type-despesa');
-  if(btnDes) btnDes.className = 'type-btn ' + (t==='despesa'?'active despesa':'');
-  
+  const btnRec = document.getElementById('type-receita'); if(btnRec) btnRec.className = 'type-btn ' + (t==='receita'?'active receita':'');
+  const btnDes = document.getElementById('type-despesa'); if(btnDes) btnDes.className = 'type-btn ' + (t==='despesa'?'active despesa':'');
   updateModalCategoryDropdown();
 }
 
@@ -482,174 +519,95 @@ const getStatusBadge = (status) => {
     return `<span class="apart-item-status status-pend">⏳ Pendente</span>`;
 };
 
-// ============================================================
-// SIMULADORES E INCC
-// ============================================================
 function calcINCC() {
-    const saldoEl = document.getElementById('sim-saldo');
-    const inccEl = document.getElementById('sim-incc');
+    const saldoEl = document.getElementById('sim-saldo'); const inccEl = document.getElementById('sim-incc');
     if(!saldoEl || !inccEl) return;
-    
-    const saldo = parseFloat(saldoEl.value) || 0;
-    const taxa = parseFloat(inccEl.value) || 0;
-    const correcao = saldo * (taxa / 100);
-    
-    const resultEl = document.getElementById('sim-incc-result');
-    if(resultEl) resultEl.textContent = '+ ' + fmt(correcao);
+    const saldo = parseFloat(saldoEl.value) || 0; const taxa = parseFloat(inccEl.value) || 0; const correcao = saldo * (taxa / 100);
+    const resultEl = document.getElementById('sim-incc-result'); if(resultEl) resultEl.textContent = '+ ' + fmt(correcao);
 }
 
 function calcAmortizacao() {
-    const amortEl = document.getElementById('sim-amort');
-    if(!amortEl) return;
-    
-    const amort = parseFloat(amortEl.value) || 0;
-    const economia = amort * 2.8; // Multiplicador estimado para o MCMV a longo prazo
-    
-    const saveEl = document.getElementById('sim-amort-save');
-    if(saveEl) saveEl.textContent = fmt(economia);
+    const amortEl = document.getElementById('sim-amort'); if(!amortEl) return;
+    const amort = parseFloat(amortEl.value) || 0; const economia = amort * 2.8; 
+    const saveEl = document.getElementById('sim-amort-save'); if(saveEl) saveEl.textContent = fmt(economia);
 }
 
-function saveSaldo() {
-    const saldoEl = document.getElementById('sim-saldo');
-    if(saldoEl) {
-        state.config.saldoDevedor = parseFloat(saldoEl.value) || 0;
-        save();
-    }
-}
+function saveSaldo() { const saldoEl = document.getElementById('sim-saldo'); if(saldoEl) { state.config.saldoDevedor = parseFloat(saldoEl.value) || 0; save(); } }
 
-// ============================================================
-// CORE COM PROTEÇÃO E REGRA 50/30/20 DINÂMICA
-// ============================================================
 function refreshAll() {
   try { renderDashboard(); } catch(e) { console.error('Dashboard Error', e); }
   try { renderAllTx(); } catch(e) { console.error('Tx Error', e); }
   try { renderApartManage(); } catch(e) { console.error('Apart Error', e); }
   try { renderMetas(); } catch(e) { console.error('Metas Error', e); }
   try { renderConfigCategories(); } catch(e) { console.error('Categories Error', e); }
-  try { 
-      const cfgInput = document.getElementById('cfg-renda');
-      if(cfgInput && document.activeElement !== cfgInput) {
-          cfgInput.value = state.config.renda || ''; 
-      }
-  } catch(e) { console.error('Config Error', e); }
+  try { const cfgInput = document.getElementById('cfg-renda'); if(cfgInput && document.activeElement !== cfgInput) { cfgInput.value = state.config.renda || ''; } } catch(e) {}
 }
 
 function initChart(labels, data) {
     if (typeof Chart === 'undefined') return;
     try {
-        const ctx = document.getElementById('expenseChart');
-        if(!ctx) return;
-
+        const ctx = document.getElementById('expenseChart'); if(!ctx) return;
         const emptyEl = document.getElementById('chart-empty');
-
         if(data.length === 0 || data.reduce((a,b)=>a+b,0) === 0) {
-            ctx.style.display = 'none'; 
-            if(emptyEl) emptyEl.style.display = 'block'; 
-            return;
-        } else {
-            ctx.style.display = 'block'; 
-            if(emptyEl) emptyEl.style.display = 'none';
-        }
+            ctx.style.display = 'none'; if(emptyEl) emptyEl.style.display = 'block'; return;
+        } else { ctx.style.display = 'block'; if(emptyEl) emptyEl.style.display = 'none'; }
 
         const cores = ['#6C63FF', '#ff4d6d', '#ff9f43', '#48cae4', '#22d06a', '#9b43ff', '#f3a683', '#546de5', '#e15f41', '#c44569'];
 
         if (myChart) {
-            myChart.data.labels = labels;
-            myChart.data.datasets[0].data = data;
-            myChart.data.datasets[0].backgroundColor = cores.slice(0, labels.length);
-            myChart.update();
+            myChart.data.labels = labels; myChart.data.datasets[0].data = data; myChart.data.datasets[0].backgroundColor = cores.slice(0, labels.length); myChart.update();
         } else {
             Chart.defaults.color = '#9095b0'; Chart.defaults.font.family = "'DM Sans', sans-serif";
-            myChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: cores.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }, tooltip: { callbacks: { label: function(context) { return ' ' + fmt(context.raw); } } } } }
-            });
+            myChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: cores.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }, tooltip: { callbacks: { label: function(context) { return ' ' + fmt(context.raw); } } } } } });
         }
     } catch(err) { console.error('Chart Error', err); }
 }
 
 function renderDashboard() {
   const txs = txThisMonth();
-  let receita = 0, despesa = 0; let chartDataMap = {};
-  
-  let gasto50 = 0; 
-  let gasto30 = 0;
-  let gasto20 = 0;
-
+  let receita = 0, despesa = 0; let chartDataMap = {}; let gasto50 = 0; let gasto30 = 0; let gasto20 = 0;
   const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia', 'Alimentação'];
   const catsFuturo = ['Investimento', 'Educação', 'Ferramentas/Trabalho', 'Cursos'];
 
   txs.forEach(t => { 
-      if(t.type==='receita') { 
-          receita += t.val; 
-      } else { 
-          despesa += t.val; 
-          chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val; 
-          
-          if(catsNecessidades.includes(t.cat)) gasto50 += t.val;
-          else if(catsFuturo.includes(t.cat)) gasto20 += t.val;
-          else gasto30 += t.val;
+      if(t.type==='receita') { receita += t.val; } else { 
+          despesa += t.val; chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val; 
+          if(catsNecessidades.includes(t.cat)) gasto50 += t.val; else if(catsFuturo.includes(t.cat)) gasto20 += t.val; else gasto30 += t.val;
       }
   });
 
-  const totalReceita = receita;
-
-  const moradia = state.apartamento.reduce((a,b) => {
-      if(b.status === 'Não Aplicável') return a;
-      return a + (parseFloat(b.val)||0);
-  }, 0);
-  
-  gasto50 += moradia;
-  const saldo = totalReceita - despesa - moradia;
-
+  const moradia = state.apartamento.reduce((a,b) => { return b.status === 'Não Aplicável' ? a : a + (parseFloat(b.val)||0); }, 0);
+  gasto50 += moradia; const saldo = receita - despesa - moradia;
   if(moradia > 0) chartDataMap['Apê/Obra'] = (chartDataMap['Apê/Obra'] || 0) + moradia;
 
   initChart(Object.keys(chartDataMap), Object.values(chartDataMap));
 
-  const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita;
+  const rendaBaseCalculo = parseFloat(state.config.renda) || receita;
   const pctMoradia = rendaBaseCalculo > 0 ? (moradia / rendaBaseCalculo * 100) : 0;
 
-  const elRec = document.getElementById('dash-receita'); if(elRec) elRec.textContent = fmt(totalReceita); 
+  const elRec = document.getElementById('dash-receita'); if(elRec) elRec.textContent = fmt(receita); 
   const elDes = document.getElementById('dash-despesa'); if(elDes) elDes.textContent = fmt(despesa);
   const elSal = document.getElementById('dash-saldo'); if(elSal) elSal.textContent = fmt(saldo); 
   const elMor = document.getElementById('dash-moradia'); if(elMor) elMor.textContent = fmt(moradia);
   
   const elPctMor = document.getElementById('dash-pct-moradia'); if(elPctMor) elPctMor.textContent = pctMoradia.toFixed(1) + '% da renda base';
   const elPctLbl = document.getElementById('pct-label'); if(elPctLbl) elPctLbl.textContent = pctMoradia.toFixed(1) + '%';
-  
-  const bar = document.getElementById('moradia-bar'); 
-  if(bar) {
-      bar.style.width = Math.min(pctMoradia / 30 * 100, 100) + '%';
-      bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)';
-  }
-  
+  const bar = document.getElementById('moradia-bar'); if(bar) { bar.style.width = Math.min(pctMoradia / 30 * 100, 100) + '%'; bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)'; }
   const elApTot = document.getElementById('apart-total'); if(elApTot) elApTot.textContent = fmt(moradia);
 
-  const teto50 = rendaBaseCalculo * 0.5;
-  const teto30 = rendaBaseCalculo * 0.3;
-  const teto20 = rendaBaseCalculo * 0.2;
-  
-  const limitPct50 = teto50 > 0 ? Math.min(100, (gasto50 / teto50) * 100) : 0;
-  const el50Text = document.getElementById('rule-50-text');
-  if(el50Text) el50Text.textContent = `${fmt(gasto50)} / ${fmt(teto50)}`;
-  const el50Bar = document.getElementById('rule-50-bar');
-  if(el50Bar) { el50Bar.style.width = limitPct50 + '%'; el50Bar.style.background = limitPct50 >= 100 ? 'var(--red)' : 'var(--blue)'; }
+  const teto50 = rendaBaseCalculo * 0.5; const limitPct50 = teto50 > 0 ? Math.min(100, (gasto50 / teto50) * 100) : 0;
+  const el50Text = document.getElementById('rule-50-text'); if(el50Text) el50Text.textContent = `${fmt(gasto50)} / ${fmt(teto50)}`;
+  const el50Bar = document.getElementById('rule-50-bar'); if(el50Bar) { el50Bar.style.width = limitPct50 + '%'; el50Bar.style.background = limitPct50 >= 100 ? 'var(--red)' : 'var(--blue)'; }
 
-  const limitPct30 = teto30 > 0 ? Math.min(100, (gasto30 / teto30) * 100) : 0;
-  const el30Text = document.getElementById('rule-30-text');
-  if(el30Text) el30Text.textContent = `${fmt(gasto30)} / ${fmt(teto30)}`;
-  const el30Bar = document.getElementById('rule-30-bar');
-  if(el30Bar) { el30Bar.style.width = limitPct30 + '%'; el30Bar.style.background = limitPct30 >= 100 ? 'var(--red)' : 'var(--orange)'; }
+  const teto30 = rendaBaseCalculo * 0.3; const limitPct30 = teto30 > 0 ? Math.min(100, (gasto30 / teto30) * 100) : 0;
+  const el30Text = document.getElementById('rule-30-text'); if(el30Text) el30Text.textContent = `${fmt(gasto30)} / ${fmt(teto30)}`;
+  const el30Bar = document.getElementById('rule-30-bar'); if(el30Bar) { el30Bar.style.width = limitPct30 + '%'; el30Bar.style.background = limitPct30 >= 100 ? 'var(--red)' : 'var(--orange)'; }
 
-  const limitPct20 = teto20 > 0 ? Math.min(100, (gasto20 / teto20) * 100) : 0;
-  const el20Text = document.getElementById('rule-20-text');
-  if(el20Text) el20Text.textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
-  const el20Bar = document.getElementById('rule-20-bar');
-  if(el20Bar) { el20Bar.style.width = limitPct20 + '%'; el20Bar.style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)'; }
+  const teto20 = rendaBaseCalculo * 0.2; const limitPct20 = teto20 > 0 ? Math.min(100, (gasto20 / teto20) * 100) : 0;
+  const el20Text = document.getElementById('rule-20-text'); if(el20Text) el20Text.textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
+  const el20Bar = document.getElementById('rule-20-bar'); if(el20Bar) { el20Bar.style.width = limitPct20 + '%'; el20Bar.style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)'; }
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
-  
   const elApList = document.getElementById('apart-list');
   if(elApList) {
       elApList.innerHTML = state.apartamento.map(a => `
@@ -659,11 +617,10 @@ function renderDashboard() {
         </div>`).join('');
   }
 
-  const recent = [...state.transacoes].reverse().slice(0, 10);
+  // Exibe apenas as transações do mês na Dashboard
+  const recent = [...txs].reverse().slice(0, 10);
   const elRecList = document.getElementById('recent-list');
-  if(elRecList) {
-      elRecList.innerHTML = recent.length ? recent.map(t => txHTML(t)).join('') : '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação</div>';
-  }
+  if(elRecList) elRecList.innerHTML = recent.length ? recent.map(t => txHTML(t)).join('') : '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação neste mês</div>';
 }
 
 function txHTML(t) {
@@ -677,10 +634,11 @@ function txHTML(t) {
 }
 
 function renderAllTx() {
-  const all = [...state.transacoes].reverse();
+  const txs = txThisMonth(); // Filtra também na aba de transações para coincidir com o mês
+  const all = [...txs].reverse();
   const el = document.getElementById('all-tx-list');
   if(!el) return;
-  if (!all.length) el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação no Caixa</div>';
+  if (!all.length) el.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:13px;">Nenhuma transação no mês selecionado</div>';
   else el.innerHTML = all.map(t => `<div style="cursor:pointer" onclick="deleteTx(${t.id})">${txHTML(t)}</div>`).join('');
 }
 
@@ -731,84 +689,45 @@ function deleteTx(id) { if(confirm('Remover do fluxo?')) { state.transacoes = st
 function saveApart() {
   const tipo = document.getElementById('ap-tipo').value; const val = parseFloat(document.getElementById('ap-val').value) || 0;
   state.apartamento.push({ id: Date.now(), tipo, val, venc: parseInt(document.getElementById('ap-venc').value) || 5, status: document.getElementById('ap-status').value });
-  save(); closeModal('modal-apart');
-  setTimeout(refreshAll, 150); 
+  save(); closeModal('modal-apart'); setTimeout(refreshAll, 150); 
 }
 
-function toggleApartStatus(id) { 
-    const a = state.apartamento.find(x => x.id === id); 
-    if(a) { a.status = a.status === 'Pendente' ? 'Pago' : (a.status === 'Pago' ? 'Não Aplicável' : 'Pendente'); save(); refreshAll(); } 
-}
+function toggleApartStatus(id) { const a = state.apartamento.find(x => x.id === id); if(a) { a.status = a.status === 'Pendente' ? 'Pago' : (a.status === 'Pago' ? 'Não Aplicável' : 'Pendente'); save(); refreshAll(); } }
 function updateApartVal(id, v) { const a = state.apartamento.find(x => x.id === id); if(a) { a.val = parseFloat(v)||0; save(); refreshAll(); } }
 function deleteApart(id) { if(confirm('Remover custo do imóvel?')) { state.apartamento = state.apartamento.filter(x => x.id !== id); save(); refreshAll(); } }
 
 function saveMeta() {
-  const nome = document.getElementById('meta-nome').value.trim();
-  if (!nome) return alert('Informe o nome!');
+  const nome = document.getElementById('meta-nome').value.trim(); if (!nome) return alert('Informe o nome!');
   state.metas.push({ id: Date.now(), nome, alvo: parseFloat(document.getElementById('meta-alvo').value) || 0, guard: parseFloat(document.getElementById('meta-guard').value) || 0, prazo: document.getElementById('meta-prazo').value, emoji: document.getElementById('meta-emoji').value || '🎯' });
-  save(); closeModal('modal-meta'); document.getElementById('meta-nome').value = ''; document.getElementById('meta-alvo').value = ''; document.getElementById('meta-guard').value = '';
-  setTimeout(refreshAll, 150); 
+  save(); closeModal('modal-meta'); document.getElementById('meta-nome').value = ''; document.getElementById('meta-alvo').value = ''; document.getElementById('meta-guard').value = ''; setTimeout(refreshAll, 150); 
 }
 function deleteMeta(id) { state.metas = state.metas.filter(m => m.id !== id); save(); refreshAll(); }
 function updateMetaGuard(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.guard = parseFloat(v)||0; save(); renderMetas(); } }
 function updateMetaAlvo(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.alvo = parseFloat(v)||0; save(); renderMetas(); } }
 
-function saveConfig() { 
-    const el = document.getElementById('cfg-renda');
-    if(el) state.config.renda = parseFloat(el.value) || 0; 
-    save(); 
-    setTimeout(refreshAll, 100); 
-}
+function saveConfig() { const el = document.getElementById('cfg-renda'); if(el) state.config.renda = parseFloat(el.value) || 0; save(); setTimeout(refreshAll, 100); }
 
 function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  
-  const elPage = document.getElementById('page-' + name);
-  if(elPage) elPage.classList.add('active'); 
-  
-  if(btn) btn.classList.add('active'); 
-  
-  const elContent = document.getElementById('content');
-  if(elContent) elContent.scrollTop = 0;
-  
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const elPage = document.getElementById('page-' + name); if(elPage) elPage.classList.add('active'); if(btn) btn.classList.add('active'); 
+  const elContent = document.getElementById('content'); if(elContent) elContent.scrollTop = 0;
   if (name === 'dashboard') refreshAll();
 }
 
-function openTxModal() { 
-    const el = document.getElementById('tx-date');
-    if(el) el.value = new Date().toISOString().split('T')[0]; 
-    setType('despesa'); 
-    openModal('modal-tx'); 
-}
-function openApartModal() { openModal('modal-apart'); }
-function openMetaModal() { openModal('modal-meta'); }
-
-function openModal(id) { 
-    const el = document.getElementById(id);
-    if(el) el.classList.add('open'); 
-}
-function closeModal(id) { 
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('open'); 
-}
-
-document.querySelectorAll('.modal-overlay').forEach(o => { 
-    o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }); 
-});
+function openTxModal() { const el = document.getElementById('tx-date'); if(el) el.value = new Date().toISOString().split('T')[0]; setType('despesa'); openModal('modal-tx'); }
+function openApartModal() { openModal('modal-apart'); } function openMetaModal() { openModal('modal-meta'); }
+function openModal(id) { const el = document.getElementById(id); if(el) el.classList.add('open'); }
+function closeModal(id) { const el = document.getElementById(id); if(el) el.classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }); });
 
 function init() {
   load();
-  const d = now(); const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const elMonth = document.getElementById('current-month');
-  if(elMonth) elMonth.textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+  if(elMonth) elMonth.textContent = months[viewingDate.getMonth()] + ' ' + viewingDate.getFullYear();
   
   const simSaldoEl = document.getElementById('sim-saldo');
-  if(simSaldoEl && state.config.saldoDevedor) {
-      simSaldoEl.value = state.config.saldoDevedor;
-      calcINCC();
-  }
-  
+  if(simSaldoEl && state.config.saldoDevedor) { simSaldoEl.value = state.config.saldoDevedor; calcINCC(); }
   refreshAll();
 }
 
