@@ -68,11 +68,13 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .progress-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
 .progress-fill.orange { background: linear-gradient(90deg, var(--orange), #ffd166); }
 
-.ruler-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+/* REGRA 50/30/20 ATUALIZADA */
+.ruler-item { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .ruler-item:last-child { border-bottom: none; }
+.ruler-item-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 .ruler-left h4 { font-size: 13px; font-weight: 600; }
 .ruler-left p { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.ruler-right { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; }
+.ruler-right { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: var(--text); }
 
 .apart-section { background: linear-gradient(135deg, rgba(255,159,67,0.08), rgba(255,159,67,0.03)); border: 1px solid rgba(255,159,67,0.2); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
 .apart-header { padding: 14px 16px 10px; display:flex; align-items:center; gap:10px; border-bottom: 1px solid rgba(255,159,67,0.15); }
@@ -176,20 +178,33 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
 
       <div class="card" style="margin-bottom:12px;">
-        <div class="card-header"><span class="card-title">⚖️ Teto de Gastos (Regra 50/30/20)</span><span style="font-size:12px;color:var(--text2);">Ideal do Mês</span></div>
+        <div class="card-header"><span class="card-title">⚖️ Teto de Gastos (Regra 50/30/20)</span><span style="font-size:12px;color:var(--text2);">Gasto vs Limite Atual</span></div>
         <div class="card-body" style="padding-top: 8px;">
+          
           <div class="ruler-item">
-            <div class="ruler-left"><h4 style="color: var(--blue)">50% Necessidades</h4><p>Moradia, Apê, Mercado, Saúde</p></div>
-            <div class="ruler-right" id="rule-50">R$ 0</div>
+            <div class="ruler-item-top">
+              <div class="ruler-left"><h4 style="color: var(--blue)">50% Necessidades</h4><p>Moradia, Apê, Mercado, Saúde</p></div>
+              <div class="ruler-right" id="rule-50-text">R$ 0 / R$ 0</div>
+            </div>
+            <div class="progress-bar" style="height:4px;"><div class="progress-fill" id="rule-50-bar" style="width:0%; background:var(--blue);"></div></div>
           </div>
+
           <div class="ruler-item">
-            <div class="ruler-left"><h4 style="color: var(--orange)">30% Estilo de Vida</h4><p>Lazer, Jantares, Assinaturas</p></div>
-            <div class="ruler-right" id="rule-30">R$ 0</div>
+            <div class="ruler-item-top">
+              <div class="ruler-left"><h4 style="color: var(--orange)">30% Estilo de Vida</h4><p>Lazer, Assinaturas, Diversos</p></div>
+              <div class="ruler-right" id="rule-30-text">R$ 0 / R$ 0</div>
+            </div>
+            <div class="progress-bar" style="height:4px;"><div class="progress-fill" id="rule-30-bar" style="width:0%; background:var(--orange);"></div></div>
           </div>
+
           <div class="ruler-item">
-            <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Chaves</h4><p>Móveis Planejados, Reserva</p></div>
-            <div class="ruler-right" id="rule-20">R$ 0</div>
+            <div class="ruler-item-top">
+              <div class="ruler-left"><h4 style="color: var(--green)">20% Futuro / Metas</h4><p>Investimentos</p></div>
+              <div class="ruler-right" id="rule-20-text">R$ 0 / R$ 0</div>
+            </div>
+            <div class="progress-bar" style="height:4px;"><div class="progress-fill" id="rule-20-bar" style="width:0%; background:var(--green);"></div></div>
           </div>
+
         </div>
       </div>
 
@@ -253,7 +268,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       <p class="sec-title">Gerais</p>
       <div class="card"><div class="card-body" style="padding-top:4px;">
         <div class="setting-row">
-          <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base p/ cálculos e regra 50/30/20</div></div>
+          <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base p/ cálculos e teto 50/30/20</div></div>
           <input id="cfg-renda" type="number" style="width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;text-align:right;" placeholder="0,00" oninput="saveConfig()"/>
         </div>
       </div></div>
@@ -343,7 +358,7 @@ let state = {
   ],
   categorias: {
     receitas: ['Salário Base', 'Consultoria', 'Freelance', 'Rendimentos', 'Outros'],
-    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Lazer', 'Outros'],
+    despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Lazer', 'Investimento', 'Outros'],
     ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
   config: { renda: 0 }
@@ -414,7 +429,7 @@ const getStatusBadge = (status) => {
 };
 
 // ============================================================
-// CORE (RENDER) COM PROTEÇÃO
+// CORE COM PROTEÇÃO E REGRA 50/30/20 DINÂMICA
 // ============================================================
 function refreshAll() {
   try { renderDashboard(); } catch(e) { console.error(e); }
@@ -422,7 +437,13 @@ function refreshAll() {
   try { renderApartManage(); } catch(e) { console.error(e); }
   try { renderMetas(); } catch(e) { console.error(e); }
   try { renderConfigCategories(); } catch(e) { console.error(e); }
-  try { document.getElementById('cfg-renda').value = state.config.renda || ''; } catch(e) {}
+  try { 
+      const cfgInput = document.getElementById('cfg-renda');
+      // Apenas preenche se não estivermos com o teclado clicado nele (Impede o bug)
+      if(document.activeElement !== cfgInput) {
+          cfgInput.value = state.config.renda || ''; 
+      }
+  } catch(e) {}
 }
 
 function initChart(labels, data) {
@@ -458,17 +479,43 @@ function initChart(labels, data) {
 function renderDashboard() {
   const txs = txThisMonth();
   let receita = 0, despesa = 0; let chartDataMap = {};
+  
+  // Variáveis para a Régua 50/30/20 Real
+  let gasto50 = 0; 
+  let gasto30 = 0;
+  let gasto20 = 0;
+
+  // Categorias Mapeadas
+  const catsNecessidades = ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Saúde', 'Farmácia'];
+  const catsFuturo = ['Investimento'];
 
   txs.forEach(t => { 
-      if(t.type==='receita') { receita += t.val; } else { despesa += t.val; chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val; }
+      if(t.type==='receita') { 
+          receita += t.val; 
+      } else { 
+          despesa += t.val; 
+          chartDataMap[t.cat] = (chartDataMap[t.cat] || 0) + t.val; 
+          
+          // Separação para a Régua 50/30/20
+          if(catsNecessidades.includes(t.cat)) gasto50 += t.val;
+          else if(catsFuturo.includes(t.cat)) gasto20 += t.val;
+          else gasto30 += t.val; // Lazer, Assinaturas e tudo que sobrar vai para Estilo de Vida
+      }
   });
 
-  const totalReceita = receita; const saldo = totalReceita - despesa;
+  const totalReceita = receita;
 
+  // CÁLCULO DOS CUSTOS DO APÊ (EXCLUI NÃO APLICÁVEIS)
   const moradia = state.apartamento.reduce((a,b) => {
       if(b.status === 'Não Aplicável') return a;
       return a + (parseFloat(b.val)||0);
   }, 0);
+  
+  // Adiciona a moradia nas Necessidades (50%)
+  gasto50 += moradia;
+  
+  // Saldo Livre = Tudo - Caixa - Apê
+  const saldo = totalReceita - despesa - moradia;
 
   if(moradia > 0) chartDataMap['Apê/Obra'] = (chartDataMap['Apê/Obra'] || 0) + moradia;
 
@@ -477,8 +524,11 @@ function renderDashboard() {
   const rendaBaseCalculo = parseFloat(state.config.renda) || totalReceita;
   const pctMoradia = rendaBaseCalculo > 0 ? (moradia / rendaBaseCalculo * 100) : 0;
 
-  document.getElementById('dash-receita').textContent = fmt(totalReceita); document.getElementById('dash-despesa').textContent = fmt(despesa);
-  document.getElementById('dash-saldo').textContent = fmt(saldo); document.getElementById('dash-moradia').textContent = fmt(moradia);
+  document.getElementById('dash-receita').textContent = fmt(totalReceita); 
+  document.getElementById('dash-despesa').textContent = fmt(despesa);
+  document.getElementById('dash-saldo').textContent = fmt(saldo); 
+  document.getElementById('dash-moradia').textContent = fmt(moradia);
+  
   document.getElementById('dash-pct-moradia').textContent = pctMoradia.toFixed(1) + '% da renda base';
   document.getElementById('pct-label').textContent = pctMoradia.toFixed(1) + '%';
   
@@ -486,7 +536,26 @@ function renderDashboard() {
   bar.style.background = pctMoradia > 30 ? 'var(--red)' : 'var(--orange)';
   document.getElementById('apart-total').textContent = fmt(moradia);
 
-  document.getElementById('rule-50').textContent = fmt(rendaBaseCalculo * 0.5); document.getElementById('rule-30').textContent = fmt(rendaBaseCalculo * 0.3); document.getElementById('rule-20').textContent = fmt(rendaBaseCalculo * 0.2);
+  // ALIMENTANDO A RÉGUA 50/30/20 DINÂMICA
+  const teto50 = rendaBaseCalculo * 0.5;
+  const teto30 = rendaBaseCalculo * 0.3;
+  const teto20 = rendaBaseCalculo * 0.2;
+  
+  const limitPct50 = teto50 > 0 ? Math.min(100, (gasto50 / teto50) * 100) : 0;
+  document.getElementById('rule-50-text').textContent = `${fmt(gasto50)} / ${fmt(teto50)}`;
+  document.getElementById('rule-50-bar').style.width = limitPct50 + '%';
+  document.getElementById('rule-50-bar').style.background = limitPct50 >= 100 ? 'var(--red)' : 'var(--blue)';
+
+  const limitPct30 = teto30 > 0 ? Math.min(100, (gasto30 / teto30) * 100) : 0;
+  document.getElementById('rule-30-text').textContent = `${fmt(gasto30)} / ${fmt(teto30)}`;
+  document.getElementById('rule-30-bar').style.width = limitPct30 + '%';
+  document.getElementById('rule-30-bar').style.background = limitPct30 >= 100 ? 'var(--red)' : 'var(--orange)';
+
+  const limitPct20 = teto20 > 0 ? Math.min(100, (gasto20 / teto20) * 100) : 0;
+  document.getElementById('rule-20-text').textContent = `${fmt(gasto20)} / ${fmt(teto20)}`;
+  document.getElementById('rule-20-bar').style.width = limitPct20 + '%';
+  document.getElementById('rule-20-bar').style.background = limitPct20 >= 100 ? 'var(--red)' : 'var(--green)';
+
 
   const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Aluguel':'🏠', 'Condomínio':'🏢', 'Internet':'📡', 'Energia':'⚡' };
   
@@ -549,15 +618,12 @@ function renderMetas() {
   }).join('');
 }
 
-// ============================================================
-// ASSINCRONISMO (DELAY FIX)
-// ============================================================
 function saveTx() {
   const desc = document.getElementById('tx-desc').value.trim(); const val = parseFloat(document.getElementById('tx-val').value);
   if (!desc || !val) return alert('Preencha descrição e valor!');
   state.transacoes.push({ id: Date.now(), type: txType, desc, val, date: document.getElementById('tx-date').value, cat: document.getElementById('tx-cat').value });
   save(); closeModal('modal-tx'); document.getElementById('tx-desc').value = ''; document.getElementById('tx-val').value = '';
-  setTimeout(refreshAll, 150); // Permite que a tela feche primeiro
+  setTimeout(refreshAll, 150); 
 }
 function deleteTx(id) { if(confirm('Remover do fluxo?')) { state.transacoes = state.transacoes.filter(t => t.id !== id); save(); refreshAll(); } }
 
@@ -565,7 +631,7 @@ function saveApart() {
   const tipo = document.getElementById('ap-tipo').value; const val = parseFloat(document.getElementById('ap-val').value) || 0;
   state.apartamento.push({ id: Date.now(), tipo, val, venc: parseInt(document.getElementById('ap-venc').value) || 5, status: document.getElementById('ap-status').value });
   save(); closeModal('modal-apart');
-  setTimeout(refreshAll, 150); // Permite que a tela feche primeiro
+  setTimeout(refreshAll, 150); 
 }
 
 function toggleApartStatus(id) { 
@@ -580,13 +646,18 @@ function saveMeta() {
   if (!nome) return alert('Informe o nome!');
   state.metas.push({ id: Date.now(), nome, alvo: parseFloat(document.getElementById('meta-alvo').value) || 0, guard: parseFloat(document.getElementById('meta-guard').value) || 0, prazo: document.getElementById('meta-prazo').value, emoji: document.getElementById('meta-emoji').value || '🎯' });
   save(); closeModal('modal-meta'); document.getElementById('meta-nome').value = ''; document.getElementById('meta-alvo').value = ''; document.getElementById('meta-guard').value = '';
-  setTimeout(refreshAll, 150); // Permite que a tela feche primeiro
+  setTimeout(refreshAll, 150); 
 }
 function deleteMeta(id) { state.metas = state.metas.filter(m => m.id !== id); save(); refreshAll(); }
 function updateMetaGuard(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.guard = parseFloat(v)||0; save(); renderMetas(); } }
 function updateMetaAlvo(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.alvo = parseFloat(v)||0; save(); renderMetas(); } }
 
-function saveConfig() { state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; save(); setTimeout(refreshAll, 50); }
+// Agora o oninput não corta a digitação, pois a tela só atualiza visualmente com calma.
+function saveConfig() { 
+    state.config.renda = parseFloat(document.getElementById('cfg-renda').value) || 0; 
+    save(); 
+    setTimeout(refreshAll, 100); 
+}
 
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
