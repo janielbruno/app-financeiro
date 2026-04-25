@@ -8,38 +8,34 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Meu Apê"/>
 <link rel="manifest" href="manifest.json"/>
-<title>Controle Financeiro - Dashboard</title>
+<title>Controlo Financeiro - Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
 :root {
-  /* Nova Paleta de Cores Corporativa */
-  --c-orange-dark: #CD7227;
-  --c-teal: #62A3AD;
-  --c-cyan: #2DD1EB;
-  --c-orange-light: #F8B883;
-  --c-slate: #5A6B6E;
+  /* Variáveis Dinâmicas de Cor (Padrão: A Paleta que escolheu) */
+  --primary: #CD7227;
+  --income: #62A3AD;
+  --accent: #2DD1EB;
   
   /* Estrutura de UI baseada na paleta */
-  --bg: #F9F6F0; /* Off-white super agradável e quente */
+  --bg: #F9F6F0; 
   --card: #FFFFFF;
-  --border: var(--c-slate);
+  --border: #5A6B6E;
   
-  --primary: var(--c-orange-dark);
-  --secondary: var(--c-teal);
-  --accent: var(--c-cyan);
+  /* Cores Semânticas derivadas (Alimentam o app todo) */
+  --expense: var(--primary);
+  --secondary: var(--income);
+  --neutral: var(--accent);
   
-  /* Cores Semânticas adaptadas à paleta */
-  --income: var(--c-teal);
-  --income-bg: rgba(98, 163, 173, 0.15);
-  --expense: var(--c-orange-dark);
-  --expense-bg: rgba(205, 114, 39, 0.15);
-  --neutral: var(--c-cyan);
-  --neutral-bg: rgba(45, 209, 235, 0.15);
+  /* Fundos translúcidos calculados automaticamente pela cor escolhida */
+  --income-bg: color-mix(in srgb, var(--income) 15%, transparent);
+  --expense-bg: color-mix(in srgb, var(--expense) 15%, transparent);
+  --neutral-bg: color-mix(in srgb, var(--accent) 15%, transparent);
   
   --text-main: #2D3748;
-  --text-muted: var(--c-slate);
+  --text-muted: #5A6B6E;
   
   --shadow: 3px 3px 0px var(--border);
   --shadow-hover: 1px 1px 0px var(--border);
@@ -63,9 +59,10 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
   justify-content: space-between;
   align-items: flex-end;
   color: #FFF;
+  transition: background 0.3s;
 }
 #header h1 { font-family: var(--font-data); font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: -0.5px; display:flex; align-items:center; gap:8px;}
-#header p { font-size: 12px; font-weight: 500; color: var(--c-orange-light); margin-top: 4px; }
+#header p { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); margin-top: 4px; }
 
 #month-badge { 
   display: inline-flex; align-items: center; gap: 8px; 
@@ -86,10 +83,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
   position: fixed; bottom: 0; left: 0; right: 0; 
   background: var(--primary); border-top: 2px solid var(--border); 
   display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); 
+  transition: background 0.3s;
 }
 .nav-btn { 
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 4px 8px; 
-  border: none; background: none; color: var(--c-orange-light); 
+  border: none; background: none; color: rgba(255,255,255,0.6); 
   font-size: 10px; font-family: var(--font-main); font-weight: 700; cursor: pointer; transition: 0.2s; 
 }
 .nav-btn.active { color: #FFF; }
@@ -119,7 +117,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
 .sum-value { font-family: var(--font-data); font-size: 16px; font-weight: 700; line-height: 1.2; }
 .sum-value.green { color: var(--income); }
 .sum-value.red { color: var(--expense); }
-.sum-value.slate { color: var(--c-slate); }
+.sum-value.slate { color: var(--border); }
 .sum-value.accent { color: var(--accent); }
 .sum-sub { font-size: 11px; font-weight:500; color: var(--text-muted); margin-top: 6px; }
 
@@ -147,7 +145,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
 .apart-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px dashed var(--border); }
 .apart-item:last-child { border-bottom: none; }
 .apart-item-left { display:flex; align-items:center; gap:12px; }
-.apart-item-icon { width:38px; height:38px; border: 1px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; font-size:18px; color: var(--c-slate); border-radius: 6px;}
+.apart-item-icon { width:38px; height:38px; border: 1px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; font-size:18px; color: var(--border); border-radius: 6px;}
 .apart-item-name { font-weight: 700; font-size: 13px; color: var(--text-main); }
 .apart-item-due { font-size: 11px; font-weight:500; color: var(--text-muted); margin-top:4px; }
 .apart-item-right { text-align:right; }
@@ -161,7 +159,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
 /* LIST ITEMS */
 .tx-item { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom: 1px dashed var(--border); }
 .tx-item:last-child { border-bottom: none; }
-.tx-ico { width:42px; height:42px; border: 1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; background:var(--card); color:var(--c-slate); }
+.tx-ico { width:42px; height:42px; border: 1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; background:var(--card); color:var(--border); }
 .tx-info { flex:1; min-width:0; }
 .tx-name { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tx-cat { font-size:11px; font-weight:500; color:var(--text-muted); margin-top:4px; }
@@ -221,7 +219,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
 .cat-tag button { background: none; border: none; color: var(--expense); margin-left: 8px; cursor: pointer; font-size: 16px; display:flex; align-items:center; justify-content:center;}
 .cat-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
 
-/* FAB */
+/* COLOR PICKER STYLES */
+.color-picker-input { width: 46px; height: 46px; padding: 0; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; box-shadow: var(--shadow); }
+.color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker-input::-webkit-color-swatch { border: none; border-radius: 4px; }
+
 #fab { 
   position:fixed; right:20px; bottom:90px; width:60px; height:60px; border-radius:30px;
   background:var(--primary); border:2px solid var(--border); color:#fff; font-size:28px; 
@@ -245,7 +247,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
     <div style="display:flex;justify-content:space-between;align-items:flex-start; width:100%;">
       <div>
         <h1><i class="ph-fill ph-chart-polar"></i> Meu Apê</h1>
-        <p>Controle Financeiro & Apartamento </p>
+        <p>Controlo Financeiro & Obra</p>
       </div>
       <div id="month-badge">
         <button class="month-btn" onclick="changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
@@ -269,7 +271,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
           <div class="sum-value red" id="dash-despesa">0.00</div>
           <div class="sum-sub">Saídas do mês</div>
         </div>
-        <div class="sum-card" style="background: var(--c-slate); border-color: var(--c-slate);">
+        <div class="sum-card" style="background: var(--border); border-color: var(--border);">
           <div class="sum-label" style="color: rgba(255,255,255,0.7);"><i class="ph-bold ph-wallet" style="font-size:14px;"></i> Saldo Livre</div>
           <div class="sum-value" style="color: #FFF;" id="dash-saldo">0.00</div>
           <div class="sum-sub" style="color: rgba(255,255,255,0.7);">Disponível</div>
@@ -277,7 +279,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
         <div class="sum-card" style="background: var(--neutral-bg);">
           <div class="sum-label"><i class="ph-bold ph-buildings" style="color:var(--neutral); font-size:14px;"></i> Custos Apê</div>
           <div class="sum-value accent" id="dash-moradia">0.00</div>
-          <div class="sum-sub" id="dash-pct-moradia">0% da renda</div>
+          <div class="sum-sub" id="dash-pct-moradia">0% da base</div>
         </div>
       </div>
 
@@ -303,15 +305,15 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
 
           <div class="ruler-item">
             <div class="ruler-item-top">
-              <div class="ruler-left"><h4 style="color: var(--c-orange-light)"><i class="ph-fill ph-coffee"></i> 30% Estilo de Vida</h4><p>Lazer, Assinaturas, Diversos</p></div>
+              <div class="ruler-left"><h4 style="color: var(--expense)"><i class="ph-fill ph-coffee"></i> 30% Estilo Vida</h4><p>Lazer, Assinaturas, Diversos</p></div>
               <div class="ruler-right" id="rule-30-text">0 / 0</div>
             </div>
-            <div class="progress-bar"><div class="progress-fill" id="rule-30-bar" style="width:0%; background:var(--c-orange-light);"></div></div>
+            <div class="progress-bar"><div class="progress-fill" id="rule-30-bar" style="width:0%; background:var(--expense);"></div></div>
           </div>
 
           <div class="ruler-item">
             <div class="ruler-item-top">
-              <div class="ruler-left"><h4 style="color: var(--accent)"><i class="ph-fill ph-rocket"></i> 20% Futuro/Metas</h4><p>Investimentos, Educação, Cursos</p></div>
+              <div class="ruler-left"><h4 style="color: var(--accent)"><i class="ph-fill ph-rocket"></i> 20% Futuro</h4><p>Investimentos, Educação</p></div>
               <div class="ruler-right" id="rule-20-text">0 / 0</div>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="rule-20-bar" style="width:0%; background:var(--accent);"></div></div>
@@ -391,6 +393,26 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
     </div>
 
     <div class="page" id="page-config">
+      
+      <p class="sec-title"><i class="ph-bold ph-palette" style="font-size:16px;"></i> Aparência (Temas)</p>
+      <div class="card"><div class="card-body" style="padding-top:4px;">
+        <div class="setting-row">
+          <div><div class="setting-label">Cor das Despesas</div><div class="setting-sub">Define Menus e Saídas (Principal)</div></div>
+          <input type="color" id="cfg-color-primary" onchange="saveTheme()" class="color-picker-input"/>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Cor das Receitas</div><div class="setting-sub">Entradas e Positivos</div></div>
+          <input type="color" id="cfg-color-income" onchange="saveTheme()" class="color-picker-input"/>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Cor de Destaque</div><div class="setting-sub">Metas e Custos do Apê</div></div>
+          <input type="color" id="cfg-color-accent" onchange="saveTheme()" class="color-picker-input"/>
+        </div>
+        <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
+          <button onclick="resetTheme()" style="width:100%;background:transparent;color:var(--text-muted);border:1px dashed var(--border); border-radius:6px; padding:12px;font-size:12px;font-weight:700;cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;"><i class="ph-bold ph-arrow-counter-clockwise"></i> Restaurar Cores Padrão</button>
+        </div>
+      </div></div>
+
       <p class="sec-title"><i class="ph-bold ph-tag" style="font-size:16px;"></i> Personalizar Categorias</p>
       <div class="card"><div class="card-body" style="padding-top:16px;">
         <div style="margin-bottom: 24px;">
@@ -427,9 +449,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text-main); font-
           <div><div class="setting-label">Renda Mensal Fixa</div><div class="setting-sub">Base p/ cálculos e teto 50/30/20</div></div>
           <input id="cfg-renda" type="number" style="width:110px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-main);font-family:var(--font-data);font-size:12px;font-weight:700;text-align:right;" placeholder="0,00" oninput="saveConfig()"/>
         </div>
-        <div class="setting-row">
+        <div class="setting-row" style="border-bottom:none; padding-bottom:0;">
           <div><div class="setting-label">Exportar Histórico</div><div class="setting-sub">Planilha CSV para Excel/Sheets</div></div>
-          <button onclick="exportCSV()" style="background:var(--primary);color:#fff;border:1px solid var(--border); border-radius:6px; padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px;"><i class="ph-bold ph-download-simple"></i> Baixar CSV</button>
+          <button onclick="exportCSV()" style="background:var(--primary);color:#fff;border:1px solid var(--border); border-radius:6px; padding:10px 16px;font-size:12px;font-weight:700;cursor:pointer; display:flex; align-items:center; gap:6px;"><i class="ph-bold ph-download-simple"></i> Baixar</button>
         </div>
       </div></div>
     </div>
@@ -518,7 +540,11 @@ let state = {
     despesas: ['Imóvel/Obra', 'Supermercado', 'Transporte', 'Assinaturas', 'Saúde', 'Farmácia', 'Alimentação', 'Lazer', 'Investimento', 'Educação', 'Ferramentas/Trabalho', 'Outros'],
     ape: ['Parcela Entrada', 'Evolução de Obra', 'Taxa Caixa', 'ITBI/Registro', 'Personalização', 'Aluguel', 'Condomínio', 'Internet', 'Energia']
   },
-  config: { renda: 0, saldoDevedor: 0 }
+  config: { 
+      renda: 0, 
+      saldoDevedor: 0,
+      theme: { primary: '#CD7227', income: '#62A3AD', accent: '#2DD1EB' }
+  }
 };
 
 let myChart = null; 
@@ -533,6 +559,7 @@ function load() {
       if(!parsed.categorias.ape) parsed.categorias.ape = state.categorias.ape;
       if(!parsed.metas) parsed.metas = state.metas;
       if(!parsed.config) parsed.config = state.config;
+      if(!parsed.config.theme) parsed.config.theme = { primary: '#CD7227', income: '#62A3AD', accent: '#2DD1EB' };
       state = { ...state, ...parsed };
       
       if(!state.categorias.despesas.includes('Educação')) state.categorias.despesas.push('Educação');
@@ -652,13 +679,45 @@ function calcAmortizacao() {
 
 function saveSaldo() { const saldoEl = document.getElementById('sim-saldo'); if(saldoEl) { state.config.saldoDevedor = parseFloat(saldoEl.value) || 0; save(); } }
 
+// Lógica de Cores Dinâmicas
+function applyTheme() {
+    if(!state.config.theme) return;
+    const root = document.documentElement;
+    root.style.setProperty('--primary', state.config.theme.primary);
+    root.style.setProperty('--income', state.config.theme.income);
+    root.style.setProperty('--accent', state.config.theme.accent);
+    
+    const elP = document.getElementById('cfg-color-primary'); if(elP) elP.value = state.config.theme.primary;
+    const elI = document.getElementById('cfg-color-income'); if(elI) elI.value = state.config.theme.income;
+    const elA = document.getElementById('cfg-color-accent'); if(elA) elA.value = state.config.theme.accent;
+}
+
+function saveTheme() {
+    if(!state.config.theme) state.config.theme = {};
+    state.config.theme.primary = document.getElementById('cfg-color-primary').value;
+    state.config.theme.income = document.getElementById('cfg-color-income').value;
+    state.config.theme.accent = document.getElementById('cfg-color-accent').value;
+    save(); applyTheme(); refreshAll();
+}
+
+function resetTheme() {
+    state.config.theme = { primary: '#CD7227', income: '#62A3AD', accent: '#2DD1EB' };
+    save(); applyTheme(); refreshAll();
+}
+
+
 function refreshAll() {
   try { renderDashboard(); } catch(e) { console.error('Dashboard Error', e); }
   try { renderAllTx(); } catch(e) { console.error('Tx Error', e); }
   try { renderApartManage(); } catch(e) { console.error('Apart Error', e); }
   try { renderMetas(); } catch(e) { console.error('Metas Error', e); }
   try { renderConfigCategories(); } catch(e) { console.error('Categories Error', e); }
-  try { const cfgInput = document.getElementById('cfg-renda'); if(cfgInput && document.activeElement !== cfgInput) { cfgInput.value = state.config.renda || ''; } } catch(e) {}
+  try { 
+      const cfgInput = document.getElementById('cfg-renda');
+      if(cfgInput && document.activeElement !== cfgInput) {
+          cfgInput.value = state.config.renda || ''; 
+      }
+  } catch(e) { console.error('Config Error', e); }
 }
 
 function initChart(labels, data) {
@@ -670,8 +729,12 @@ function initChart(labels, data) {
             ctx.style.display = 'none'; if(emptyEl) emptyEl.style.display = 'block'; return;
         } else { ctx.style.display = 'block'; if(emptyEl) emptyEl.style.display = 'none'; }
 
-        // Cores da nova paleta para o gráfico
-        const cores = ['#62A3AD', '#CD7227', '#2DD1EB', '#F8B883', '#5A6B6E', '#E28E4C', '#4F8A94', '#1AA7BD', '#D9A174', '#485659'];
+        // Mapeia dinamicamente as cores escolhidas pelo utilizador para as primeiras do gráfico
+        const themeP = state.config.theme?.primary || '#CD7227';
+        const themeI = state.config.theme?.income || '#62A3AD';
+        const themeA = state.config.theme?.accent || '#2DD1EB';
+        const fallback = ['#F8B883', '#5A6B6E', '#E28E4C', '#4F8A94', '#1AA7BD', '#D9A174', '#485659'];
+        const cores = [themeI, themeP, themeA, ...fallback];
 
         if (myChart) {
             myChart.data.labels = labels; myChart.data.datasets[0].data = data; myChart.data.datasets[0].backgroundColor = cores.slice(0, labels.length); myChart.update();
@@ -709,7 +772,7 @@ function renderDashboard() {
   const elSal = document.getElementById('dash-saldo'); if(elSal) elSal.textContent = fmt(saldo); 
   const elMor = document.getElementById('dash-moradia'); if(elMor) elMor.textContent = fmt(moradia);
   
-  const elPctMor = document.getElementById('dash-pct-moradia'); if(elPctMor) elPctMor.textContent = pctMoradia.toFixed(1) + '% da renda base';
+  const elPctMor = document.getElementById('dash-pct-moradia'); if(elPctMor) elPctMor.textContent = pctMoradia.toFixed(1) + '% da base';
   const elPctLbl = document.getElementById('pct-label'); if(elPctLbl) elPctLbl.textContent = pctMoradia.toFixed(1) + '%';
   const bar = document.getElementById('moradia-bar'); if(bar) { bar.style.width = Math.min(pctMoradia / 30 * 100, 100) + '%'; bar.style.background = pctMoradia > 30 ? 'var(--expense)' : 'var(--accent)'; }
   const elApTot = document.getElementById('apart-total'); if(elApTot) elApTot.textContent = fmt(moradia);
@@ -735,7 +798,6 @@ function renderDashboard() {
         </div>`).join('');
   }
 
-  // Exibe apenas as transações do mês na Dashboard
   const recent = [...txs].reverse().slice(0, 10);
   const elRecList = document.getElementById('recent-list');
   if(elRecList) elRecList.innerHTML = recent.length ? recent.map(t => txHTML(t)).join('') : '<div style="text-align:center;color:var(--text-muted);font-size:13px;font-weight:700;padding:20px;">Sem registos este mês</div>';
@@ -782,7 +844,7 @@ function renderMetas() {
   el.innerHTML = state.metas.map(m => {
     const pct = m.alvo > 0 ? Math.min(100, m.guard / m.alvo * 100) : 0; const falta = Math.max(0, m.alvo - m.guard); const color = pct >= 100 ? 'var(--income)' : pct >= 50 ? 'var(--c-orange-light)' : 'var(--expense)';
     return `<div class="meta-card">
-      <div class="meta-header"><div class="meta-icon"><i class="ph-bold ph-target"></i></div><div style="flex:1;"><div class="meta-name">${m.nome}</div><div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:4px;">${m.prazo ? 'Prazo: '+m.prazo : 'Sem prazo'}</div></div><button onclick="deleteMeta(${m.id})" style="background:none;border:none;color:var(--c-slate);font-size:18px;cursor:pointer;"><i class="ph-bold ph-x"></i></button></div>
+      <div class="meta-header"><div class="meta-icon"><i class="ph-bold ph-target"></i></div><div style="flex:1;"><div class="meta-name">${m.nome}</div><div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:4px;">${m.prazo ? 'Prazo: '+m.prazo : 'Sem prazo'}</div></div><button onclick="deleteMeta(${m.id})" style="background:none;border:none;color:var(--border);font-size:18px;cursor:pointer;"><i class="ph-bold ph-x"></i></button></div>
       <div class="meta-vals"><span>Guardado: <b style="color:${color}">${fmt(m.guard)}</b></span><span>Falta: <b style="color:var(--expense)">${fmt(falta)}</b></span><span>Meta: <b>${fmt(m.alvo)}</b></span></div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%; background:${color};"></div></div>
       <div style="font-family:var(--font-data);font-size:9px;color:var(--text-main);font-weight:700;margin-top:8px;text-align:right;">${pct.toFixed(1)}% atingido</div>
@@ -822,8 +884,6 @@ function deleteMeta(id) { state.metas = state.metas.filter(m => m.id !== id); sa
 function updateMetaGuard(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.guard = parseFloat(v)||0; save(); renderMetas(); } }
 function updateMetaAlvo(id, v) { const m = state.metas.find(x => x.id === id); if(m) { m.alvo = parseFloat(v)||0; save(); renderMetas(); } }
 
-function saveConfig() { const el = document.getElementById('cfg-renda'); if(el) state.config.renda = parseFloat(el.value) || 0; save(); setTimeout(refreshAll, 100); }
-
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const elPage = document.getElementById('page-' + name); if(elPage) elPage.classList.add('active'); if(btn) btn.classList.add('active'); 
@@ -839,6 +899,8 @@ document.querySelectorAll('.modal-overlay').forEach(o => { o.addEventListener('c
 
 function init() {
   load();
+  applyTheme(); // Aplica a cor salva no inicio
+  
   const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const elMonth = document.getElementById('current-month');
   if(elMonth) elMonth.textContent = months[viewingDate.getMonth()] + ' ' + viewingDate.getFullYear();
