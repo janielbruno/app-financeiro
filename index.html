@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#6C63FF"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Finanças"/>
+<meta name="apple-mobile-web-app-title" content="Meu Apê"/>
 <link rel="manifest" href="manifest.json"/>
-<title>Controle Financeiro</title>
+<title>Controle Financeiro - Imóvel na Planta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -262,21 +262,18 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 <body>
 <div id="app">
 
-  <!-- HEADER -->
   <div id="header">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
         <h1>💰 Minhas Finanças</h1>
-        <p>Controle pessoal • Apartamento</p>
+        <p>Controle pessoal • Imóvel na Planta</p>
       </div>
       <div id="month-badge">📅 <span id="current-month"></span></div>
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div id="content">
 
-    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="summary-grid">
         <div class="sum-card green">
@@ -290,21 +287,20 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
           <div class="sum-sub">no mês atual</div>
         </div>
         <div class="sum-card blue">
-          <div class="sum-label">Saldo</div>
+          <div class="sum-label">Saldo Livre</div>
           <div class="sum-value blue" id="dash-saldo">R$ 0</div>
           <div class="sum-sub">disponível</div>
         </div>
         <div class="sum-card orange">
-          <div class="sum-label">Moradia</div>
+          <div class="sum-label">Custos do Apê</div>
           <div class="sum-value orange" id="dash-moradia">R$ 0</div>
           <div class="sum-sub" id="dash-pct-moradia">0% da renda</div>
         </div>
       </div>
 
-      <!-- Progresso moradia -->
       <div class="card" style="margin-bottom:12px;">
         <div class="card-header">
-          <span class="card-title">🏠 % Moradia na Renda</span>
+          <span class="card-title">🏠 % do Imóvel na Renda</span>
           <span style="font-size:12px;color:var(--text2);">ideal ≤ 30%</span>
         </div>
         <div class="card-body">
@@ -318,21 +314,19 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
         </div>
       </div>
 
-      <!-- Apartamento -->
       <div class="apart-section">
         <div class="apart-header">
-          <div class="icon">🏠</div>
+          <div class="icon">🏗️</div>
           <div class="info">
-            <h3>Apartamento</h3>
-            <p>Custos do mês</p>
+            <h3>Evolução do Imóvel</h3>
+            <p>Custos da obra e entrada (Mês)</p>
           </div>
           <div class="apart-total" id="apart-total">R$ 0</div>
         </div>
         <div id="apart-list"></div>
       </div>
 
-      <!-- Últimas transações -->
-      <p class="sec-title">Últimas Transações</p>
+      <p class="sec-title">Últimas Transações (Dia a dia)</p>
       <div class="card">
         <div class="card-body" style="padding-top:8px;" id="recent-list">
           <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Nenhuma transação ainda</div>
@@ -340,7 +334,6 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
     </div>
 
-    <!-- TRANSAÇÕES -->
     <div class="page" id="page-transacoes">
       <p class="sec-title">Todas as Transações</p>
       <div class="card">
@@ -350,21 +343,18 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
     </div>
 
-    <!-- APARTAMENTO -->
     <div class="page" id="page-apart">
-      <p class="sec-title">Gerenciar Custos do Apartamento</p>
+      <p class="sec-title">Gerenciar Custos do Imóvel</p>
       <div id="apart-manage-list"></div>
-      <button class="btn-primary" onclick="openApartModal()" style="margin-top:4px;">+ Adicionar Custo de Moradia</button>
+      <button class="btn-primary" onclick="openApartModal()" style="margin-top:4px;">+ Adicionar Custo da Obra/Imóvel</button>
     </div>
 
-    <!-- METAS -->
     <div class="page" id="page-metas">
       <p class="sec-title">Minhas Metas</p>
       <div id="metas-list"></div>
       <button class="btn-primary" onclick="openMetaModal()" style="margin-top:4px;">+ Nova Meta</button>
     </div>
 
-    <!-- CONFIGURAÇÕES -->
     <div class="page" id="page-config">
       <p class="sec-title">Configurações</p>
       <div class="card"><div class="card-body" style="padding-top:4px;">
@@ -377,7 +367,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
           <input id="cfg-renda" type="number" style="width:120px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;text-align:right;" placeholder="0,00" oninput="saveConfig();refreshAll()"/>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Dia do Aluguel</div><div class="setting-sub">Vencimento todo mês</div></div>
+          <div><div class="setting-label">Dia do Vencimento</div><div class="setting-sub">Construtora / Caixa</div></div>
           <input id="cfg-dia-aluguel" type="number" min="1" max="31" style="width:70px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:13px;text-align:right;" placeholder="5" oninput="saveConfig()"/>
         </div>
         <div class="setting-row">
@@ -403,33 +393,28 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
       </div>
     </div>
 
-  </div><!-- /content -->
-
-  <!-- NAV -->
-  <nav id="nav">
+  </div><nav id="nav">
     <button class="nav-btn active" onclick="showPage('dashboard',this)">
       <span class="ico">📊</span><span>Início</span>
     </button>
     <button class="nav-btn" onclick="showPage('transacoes',this)">
-      <span class="ico">💸</span><span>Lançamentos</span>
+      <span class="ico">💸</span><span>Despesas</span>
     </button>
     <button class="nav-btn" onclick="showPage('apart',this)">
-      <span class="ico">🏠</span><span>Moradia</span>
+      <span class="ico">🏗️</span><span>Apê</span>
     </button>
     <button class="nav-btn" onclick="showPage('metas',this)">
-      <span class="ico">🎯</span><span>Metas</span>
+      <span class="ico">🛋️</span><span>Metas</span>
     </button>
     <button class="nav-btn" onclick="showPage('config',this)">
       <span class="ico">⚙️</span><span>Config</span>
     </button>
   </nav>
 
-  <!-- FAB -->
   <button id="fab" onclick="openTxModal()">+</button>
 
 </div>
 
-<!-- MODAL: TRANSAÇÃO -->
 <div class="modal-overlay" id="modal-tx">
   <div class="modal">
     <h2 id="modal-tx-title">Nova Transação</h2>
@@ -454,7 +439,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     <div class="form-group">
       <label>Categoria</label>
       <select id="tx-cat">
-        <option value="Moradia">🏠 Moradia</option>
+        <option value="Imóvel/Obra">🏗️ Imóvel/Obra</option>
         <option value="Salário">💼 Salário</option>
         <option value="Alimentação">🛒 Alimentação</option>
         <option value="Transporte">🚗 Transporte</option>
@@ -471,21 +456,18 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
   </div>
 </div>
 
-<!-- MODAL: CUSTO APART -->
 <div class="modal-overlay" id="modal-apart">
   <div class="modal">
-    <h2>Custo de Moradia</h2>
+    <h2>Custo do Imóvel na Planta</h2>
     <div class="form-group">
       <label>Tipo</label>
       <select id="ap-tipo">
-        <option value="Aluguel">🏠 Aluguel</option>
-        <option value="Condomínio">🏢 Condomínio</option>
-        <option value="IPTU">📋 IPTU</option>
-        <option value="Internet">📡 Internet</option>
-        <option value="Energia">⚡ Energia</option>
-        <option value="Água/Gás">💧 Água/Gás</option>
-        <option value="Seguro">🔒 Seguro</option>
-        <option value="Manutenção">🔧 Manutenção</option>
+        <option value="Parcela Entrada">🧱 Parcela Entrada</option>
+        <option value="Evolução de Obra">🏗️ Evolução de Obra</option>
+        <option value="Taxa Caixa">🏦 Taxa Caixa</option>
+        <option value="ITBI/Registro">📄 ITBI/Registro</option>
+        <option value="Personalização">🛠️ Personalização</option>
+        <option value="Outros">📦 Outros</option>
       </select>
     </div>
     <div class="form-row">
@@ -510,13 +492,12 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
   </div>
 </div>
 
-<!-- MODAL: META -->
 <div class="modal-overlay" id="modal-meta">
   <div class="modal">
     <h2>Nova Meta</h2>
     <div class="form-group">
       <label>Nome da Meta</label>
-      <input id="meta-nome" type="text" placeholder="Ex: Reserva de emergência"/>
+      <input id="meta-nome" type="text" placeholder="Ex: Móveis Planejados"/>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -550,16 +531,15 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 let state = {
   transacoes: [],
   apartamento: [
-    { id: 1, tipo: 'Aluguel', val: 0, venc: 5, status: 'Pendente' },
-    { id: 2, tipo: 'Condomínio', val: 0, venc: 10, status: 'Pendente' },
-    { id: 3, tipo: 'Internet', val: 0, venc: 20, status: 'Pendente' },
-    { id: 4, tipo: 'Energia', val: 0, venc: 18, status: 'Pendente' },
+    { id: 1, tipo: 'Parcela Entrada', val: 0, venc: 10, status: 'Pendente' },
+    { id: 2, tipo: 'Evolução de Obra', val: 0, venc: 20, status: 'Pendente' },
+    { id: 3, tipo: 'Taxa Caixa', val: 0, venc: 15, status: 'Pendente' }
   ],
   metas: [
-    { id: 1, nome: 'Reserva de Emergência', alvo: 10000, guard: 0, prazo: '', emoji: '🛡️' },
-    { id: 2, nome: 'Fundo de Mobília', alvo: 5000, guard: 0, prazo: '', emoji: '🛋️' },
+    { id: 1, nome: 'Móveis Planejados', alvo: 15000, guard: 0, prazo: '2028-12', emoji: '🛋️' },
+    { id: 2, nome: 'Reserva p/ Chaves e ITBI', alvo: 5000, guard: 0, prazo: '2028-12', emoji: '🔑' },
   ],
-  config: { nome: '', renda: 0, diaAluguel: 5, notif: false }
+  config: { nome: '', renda: 0, diaAluguel: 10, notif: false }
 };
 
 // ============================================================
@@ -577,8 +557,8 @@ function load() {
 const fmt = v => 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const now = () => new Date();
 const currentMonth = () => { const d = now(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
-const catIcons = { Moradia:'🏠', Salário:'💼', Alimentação:'🛒', Transporte:'🚗', Saúde:'❤️', Lazer:'🎭', Educação:'📚', Investimento:'📈', Cartão:'💳', Outros:'📦' };
-const catColors = { Moradia:'orange', Salário:'green', Alimentação:'green', Transporte:'blue', Saúde:'red', Lazer:'blue', Educação:'blue', Investimento:'green', Cartão:'red', Outros:'blue' };
+const catIcons = { 'Imóvel/Obra':'🏗️', Salário:'💼', Alimentação:'🛒', Transporte:'🚗', Saúde:'❤️', Lazer:'🎭', Educação:'📚', Investimento:'📈', Cartão:'💳', Outros:'📦' };
+const catColors = { 'Imóvel/Obra':'orange', Salário:'green', Alimentação:'green', Transporte:'blue', Saúde:'red', Lazer:'blue', Educação:'blue', Investimento:'green', Cartão:'red', Outros:'blue' };
 
 function txThisMonth() {
   const m = currentMonth();
@@ -625,7 +605,7 @@ function renderDashboard() {
 
   // Apart list dashboard
   const al = document.getElementById('apart-list');
-  const apIcons = { Aluguel:'🏠', Condomínio:'🏢', IPTU:'📋', Internet:'📡', Energia:'⚡', 'Água/Gás':'💧', Seguro:'🔒', Manutenção:'🔧' };
+  const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Outros':'📦' };
   al.innerHTML = state.apartamento.map(a => `
     <div class="apart-item">
       <div class="apart-item-left">
@@ -694,7 +674,7 @@ function renderAllTx() {
 }
 
 function renderApartManage() {
-  const apIcons = { Aluguel:'🏠', Condomínio:'🏢', IPTU:'📋', Internet:'📡', Energia:'⚡', 'Água/Gás':'💧', Seguro:'🔒', Manutenção:'🔧' };
+  const apIcons = { 'Parcela Entrada':'🧱', 'Evolução de Obra':'🏗️', 'Taxa Caixa':'🏦', 'ITBI/Registro':'📄', 'Personalização':'🛠️', 'Outros':'📦' };
   const el = document.getElementById('apart-manage-list');
   el.innerHTML = state.apartamento.map(a => `
     <div class="apart-section" style="margin-bottom:10px;">
